@@ -85,9 +85,8 @@
   #root .print-area { display:none; }
 
   @media print {
-    body * { visibility: hidden; }
-    #root .print-area, #root .print-area * { visibility: visible; }
-    #root .print-area { display:block; position:absolute; left:0; top:0; width:100%; background:#fff; color:#111; padding: 20px; font-family: 'IBM Plex Sans', Arial, sans-serif; }
+    #root .wrap { display: none !important; }
+    #root .print-area { display:block !important; position:static; width:100%; background:#fff; color:#111; padding: 0; font-family: 'IBM Plex Sans', Arial, sans-serif; }
     #root .print-area .ph { font-family:'IBM Plex Mono',monospace; white-space:pre-wrap; font-size:12px; line-height:1.55; }
     #root .print-area .ph-header { display:flex; justify-content:space-between; border-bottom: 2px solid #222; padding-bottom:10px; margin-bottom:14px; }
     #root .print-area .ph-title { text-align:center; font-size:16px; font-weight:700; margin: 10px 0 14px 0; }
@@ -1134,14 +1133,12 @@ document.getElementById('printReportBtn').addEventListener('click', () => {
     const svgEl = document.querySelector(`#root .disc-layer[data-level="${level}"] svg`);
     const clone = svgEl.cloneNode(true);
     const lit = litSectorsByLevel[level];
-    if (lit.size > 0) {
-      clone.querySelectorAll('[id]').forEach(el => {
-        if (el.id.match(sectorPattern) && !lit.has(el.id)) {
-          const existing = el.getAttribute('style') || '';
-          el.setAttribute('style', existing + ';filter:grayscale(1) brightness(0.95);');
-        }
-      });
-    }
+    clone.querySelectorAll('[id]').forEach(el => {
+      if (el.id.match(sectorPattern) && !lit.has(el.id)) {
+        const existing = el.getAttribute('style') || '';
+        el.setAttribute('style', existing + ';filter:grayscale(1) brightness(0.95);');
+      }
+    });
     return `<figure class="ph-map-fig"><div>${clone.outerHTML}</div><figcaption>${LEVEL_NAMES[level]}</figcaption></figure>`;
   }).join('');
 
