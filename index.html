@@ -769,8 +769,8 @@ function renderSidePanel() {
       <div class="field">
         <label>DCE (enhancement focale precoce)</label>
         <div class="zone-toggle">
-          <button data-dce="no" class="${entry.dce==='no'?'active':''}">Assente</button>
-          <button data-dce="yes" class="${entry.dce==='yes'?'active':''}">Presente</button>
+          <button data-dce="no" class="${entry.dce==='no'?'active':''}">Negativo</button>
+          <button data-dce="yes" class="${entry.dce==='yes'?'active':''}">Positivo</button>
         </div>
       </div>
     `;
@@ -994,109 +994,99 @@ function updateMetaReadout() {
 });
 
 const ZONE_ORIGIN_LABEL = { R: 'destro', L: 'sinistro' };
-const ZONE_ORIGIN_LABEL_F = { R: 'destra', L: 'sinistra' };
-const MACRO_ZONE = { PZa:'zona periferica', PZpl:'zona periferica', PZpm:'zona periferica', CZ:'zona centrale', TZa:'zona di transizione', TZp:'zona di transizione', AFS:'stroma fibromuscolare anteriore' };
-const SUB_ZONE_PHRASE = { PZa:'versante anteriore', PZpl:'versante postero-laterale', PZpm:'versante posteromediale', TZa:'versante anteriore', TZp:'versante posteriore', CZ:'', AFS:'' };
-const LEVEL_PHRASE = { base:'della base', mid:'del corpo medio', apex:"dell'apice" };
 
-function lesionSentence(e) {
-  const sub = SUB_ZONE_PHRASE[e.zone] ? `, ${SUB_ZONE_PHRASE[e.zone]} ${ZONE_ORIGIN_LABEL[e.side]}` : ` ${ZONE_ORIGIN_LABEL[e.side]}`;
-  const seqPart = e.group === 'PZ'
-    ? `DWI categoria ${e.dwi}${e.dwi === 3 ? `, DCE ${e.dce === 'yes' ? 'presente' : 'assente'}` : ''}`
-    : `T2W categoria ${e.t2}${(e.t2===2||e.t2===3) && e.dwi ? `, DWI categoria ${e.dwi}` : ''}`;
-  const sizePart = e.size ? `, ${e.size} mm di diametro massimo` : '';
-  return `A livello ${LEVEL_PHRASE[e.level]}${sub}, area con caratteristiche di sospetto (${seqPart})${sizePart}: PI-RADS ${e.category}.`;
-}
-
-function zoneReferencePhrase(e) {
-  const macro = MACRO_ZONE[e.zone];
-  const sub = SUB_ZONE_PHRASE[e.zone];
-  const parts = [macro];
-  if (sub) parts.push(`${sub} ${ZONE_ORIGIN_LABEL_F[e.side]}`);
-  parts.push(LEVEL_PHRASE[e.level]);
-  return parts.join(', ');
-}
+const REFERENCES = [
+  'Turkbey B, et al. PI-RADS Steering Committee: The PI-RADS Multiparametric MRI and MRI-directed Biopsy Pathway. Eur Urol 2019.',
+  'Kryvenko ON, Epstein JI. Prostate cancer grading: a decade after the 2005 modified system. Urology 2014;83(4):869-874.',
+  'Humphrey PA, et al. The 2016 WHO Classification of Tumours of the Urinary System and Male Genital Organs. Eur Urol 2016;70(1):106-119.',
+  'Sathianathen NJ, et al. Negative predictive value of multiparametric MRI in biopsy-naive men. Eur Urol 2020;78:402-414.',
+];
 
 function generateReport() {
   if (reportManuallyEdited) return;
   const entries = allLesionsFlat().filter(e => e.category).sort((a,b) => b.category - a.category);
-  const pzEntries = entries.filter(e => e.group === 'PZ');
-  const tzEntries = entries.filter(e => e.group === 'TZ');
   const { volume, density } = computeVolumeDensity();
 
-  let L = [];
+  let lines = [];
+  lines.push('REFERTO STRUTTURATO RM PROSTATA MULTIPARAMETRICA');
+  lines.push('- PI-RADS v2.1 -');
+  lines.push('');
+
   if (meta.patient || meta.dob || meta.pid) {
-    L.push(`Paziente: ${meta.patient || '....'}    Data di nascita: ${meta.dob || '....'}    ID: ${meta.pid || '....'}`);
-    L.push('');
+    lines.push(`Paziente: ${meta.patient || '....'}    Data di nascita: ${meta.dob || '....'}    ID: ${meta.pid || '....'}`);
+    lines.push('');
   }
 
-  L.push(`Indagine condotta mediante acquisizioni multiplanari a diversa pesatura in T1, T2, completata con acquisizioni DW e con acquisizioni dopo somministrazione di mdc (Gadovist, ${meta.mdc != null ? meta.mdc : '..'} mL), secondo protocollo mpRM Prostatica.`);
-  L.push('');
-  L.push(`PRECEDENTI: ${meta.precedenti || ''}`);
-  L.push('');
-  L.push(`QUESITO DIAGNOSTICO: ${meta.indication || 'valutazione prostata.'}`);
-  L.push('');
-  L.push(`PSA: ${meta.psa != null ? meta.psa : '..'} ng/ml. PSA density: ${density != null ? density.toFixed(2) : '..'}`);
-  L.push('');
-  L.push(`GHIANDOLA PROSTATICA: diametri trasversi massimi di ${meta.ap && meta.lr ? (meta.ap/10).toFixed(1)+' x '+(meta.lr/10).toFixed(1) : '..'} cm, diametro cranio-caudale di ${meta.cc ? (meta.cc/10).toFixed(1) : '..'} cm, per un volume massimo di ${volume ? volume.toFixed(1) : '..'} cc`);
-  L.push('');
+  if (meta.indication || meta.psa != null) {
+    lines.push('DATI CLINICI');
+    if (meta.indication) lines.push(`Indicazione clinica: ${meta.indication}`);
+    if (meta.psa != null) lines.push(`PSA sierico: ${meta.psa} ng/ml`);
+    lines.push('');
+  }
 
-  L.push('REGIONE PERIFERICA: nella sequenza dominante DWI ' + (pzEntries.length === 0
-    ? 'non si apprezzano significative alterazioni di segnale.'
-    : pzEntries.map(lesionSentence).join(' ')));
-  L.push('');
+  if (meta.ap && meta.lr && meta.cc) {
+    lines.push('BIOMETRIA');
+    lines.push(`Diametri (AP x LR x CC): ${meta.ap} x ${meta.lr} x ${meta.cc} mm`);
+    lines.push(`Volume stimato: ${volume.toFixed(1)} cc`);
+    if (density != null) {
+      lines.push(`PSA density: ${density.toFixed(2)} ng/ml/cc (${density >= 0.20 ? 'sopra soglia di sospetto, \u22650.20' : 'sotto soglia di sospetto'})`);
+    }
+    lines.push('');
+  }
 
-  L.push('REGIONE TRANSIZIONALE: nella sequenza dominante T2-pesata ' + (tzEntries.length === 0
-    ? 'non si apprezzano significative alterazioni di segnale.'
-    : tzEntries.map(lesionSentence).join(' ')));
-  L.push('');
+  if (entries.length > 0) {
+    lines.push('REPERTI PER SETTORE');
+    entries.forEach((e, i) => {
+      lines.push(`Lesione ${i+1} \u2014 ${e.zone}, ${LEVEL_NAMES[e.level]}, lato ${ZONE_ORIGIN_LABEL[e.side]}`);
+      if (e.group === 'PZ') {
+        lines.push(`  DWI/ADC: categoria ${e.dwi}`);
+        if (e.dwi === 3) lines.push(`  DCE: ${e.dce === 'yes' ? 'Positivo' : e.dce === 'no' ? 'Negativo' : '....'}`);
+      } else {
+        lines.push(`  T2W: categoria ${e.t2}`);
+        if (e.t2 === 2 || e.t2 === 3) lines.push(`  DWI/ADC (upgrade): categoria ${e.dwi || '....'}`);
+      }
+      if (e.size) lines.push(`  Diametro massimo: ${e.size} mm`);
+      lines.push(`  Categoria PI-RADS: ${e.category}`);
+      lines.push('');
+    });
+  }
 
-  L.push('VESCICOLE SEMINALI: ' + (meta.sv === 'suspicious'
-    ? `aspetto sospetto per infiltrazione neoplastica${meta.svSide ? ', lato ' + meta.svSide : ''}.`
-    : 'nei limiti.'));
-  L.push('');
-  L.push('VESCICA: ' + (meta.bladder === 'positive'
-    ? (meta.bladderNote || 'reperti patologici.')
-    : 'la vescica presenta pareti lievemente ispessite ed irregolari come per ipertrofia della tonaca muscolare.'));
-  L.push('');
-  L.push('LINFONODI PELVICI: ' + (meta.nodes === 'suspicious'
-    ? `linfonodo sospetto in sede ${meta.nodesSite || '....'}${meta.nodesSize ? ', di ' + meta.nodesSize + ' mm' : ''}.`
-    : 'non significative linfoadenomegalie in corrispondenza delle principali catene della pelvi.'));
-  L.push('');
-  L.push('FALDA LIQUIDA: ' + (meta.fluid === 'positive'
-    ? (meta.fluidNote || 'presente falda liquida periprostatica.')
-    : 'non falda liquida.'));
-  L.push('');
-  L.push('OSSA: ' + (meta.bones === 'suspicious'
-    ? `area sospetta in sede ${meta.bonesSite || '....'}${meta.bonesSize ? ', di ' + meta.bonesSize + ' mm' : ''}.`
-    : 'non evidenza di franche lesioni focali nel volume di acquisizione.'));
-  L.push('');
-  L.push(`ALTRI RILIEVI: ${meta.altri || ''}`);
-  L.push('');
+  lines.push('ULTERIORI RILIEVI');
+  lines.push(`Linfonodi pelvici: ${meta.nodes === 'suspicious' ? `Sospetti (sede: ${meta.nodesSite || '....'}${meta.nodesSize ? ', ' + meta.nodesSize + ' mm' : ''})` : 'Non significativi'}`);
+  lines.push(`Vescicole seminali: ${meta.sv === 'suspicious' ? `Sospette${meta.svSide ? ' (lato: ' + meta.svSide + ')' : ''}` : 'Nei limiti'}`);
+  lines.push(`Vescica: ${meta.bladder === 'positive' ? (meta.bladderNote || 'Reperti patologici') : 'Nella norma'}`);
+  lines.push(`Falda liquida periprostatica: ${meta.fluid === 'positive' ? (meta.fluidNote || 'Presente') : 'Assente'}`);
+  lines.push(`Ossa: ${meta.bones === 'suspicious' ? `Sospette (sede: ${meta.bonesSite || '....'}${meta.bonesSize ? ', ' + meta.bonesSize + ' mm' : ''})` : 'Non evidenza di lesioni'}`);
+  if (meta.altri) lines.push(`Altri rilievi: ${meta.altri}`);
+  lines.push('');
 
-  L.push('CONCLUSIONI:');
-  if (entries.length === 0) {
-    L.push('Non si segnalano reperti target clinicamente significativi in questo esame.');
-  } else {
+  if (entries.length > 0) {
+    lines.push('CONCLUSIONE (per l\'urologo)');
     const idx = entries[0];
-    L.push(`Reperto principale: PI-RADS ${idx.category}, localizzato in ${zoneReferencePhrase(idx)}.`);
-    if (entries.length > 1) L.push(`Ulteriori ${entries.length - 1} reperto/i di categoria inferiore (vedi sopra).`);
-    L.push('Linfonodi pelvici: ' + (meta.nodes === 'suspicious' ? `sospetti (${meta.nodesSite || '....'}${meta.nodesSize ? ', ' + meta.nodesSize + ' mm' : ''}).` : 'non significativi.') +
-      '  Vescicole seminali: ' + (meta.sv === 'suspicious' ? `sospette${meta.svSide ? ' ('+meta.svSide+')' : ''}.` : 'nei limiti.') +
-      '  Reperti ossei: ' + (meta.bones === 'suspicious' ? `sospetti (${meta.bonesSite || '....'}${meta.bonesSize ? ', ' + meta.bonesSize + ' mm' : ''}).` : 'non evidenti.'));
-    if (idx.category >= 4) L.push('Si raccomanda biopsia mirata (fusion-guided) sul settore indicato.');
-    else if (idx.category === 3) L.push('Reperto da valutare in base al contesto clinico (PSA, PSA density, precedenti biopsie).');
-    else L.push('Follow-up secondo protocollo clinico.');
-  }
-  L.push('');
-  L.push('SCALA SISTEMA di REFERTAZIONE PI-RADS (Prostate Imaging-Reporting and Data System version 2.1)');
-  L.push('1 = neoplasia significativa altamente improbabile');
-  L.push('2 = neoplasia significativa improbabile');
-  L.push('3 = neoplasia significativa dubbia');
-  L.push('4 = neoplasia significativa probabile');
-  L.push('5 = neoplasia significativa altamente probabile');
+    lines.push(`Lesione indice: PI-RADS ${idx.category} \u2014 settore ${idx.zone}, ${LEVEL_NAMES[idx.level]}, lato ${ZONE_ORIGIN_LABEL[idx.side]}.`);
+    lines.push(`Reperti totali identificati: ${entries.length}.`);
+    lines.push(`Linfonodi: ${meta.nodes === 'suspicious' ? 'sospetti' : 'non significativi'}.  Vescicole seminali: ${meta.sv === 'suspicious' ? 'sospette' : 'nei limiti'}.  Ossa: ${meta.bones === 'suspicious' ? 'sospette' : 'non evidenti'}.`);
+    if (idx.category >= 4) {
+      lines.push('Raccomandazione: biopsia mirata (fusion-guided) sul settore indicato.');
+    } else if (idx.category === 3) {
+      lines.push('Raccomandazione: da valutare in base al contesto clinico (PSA, PSA density, biopsie pregresse).');
+    } else {
+      lines.push('Raccomandazione: follow-up secondo protocollo clinico.');
+    }
+    lines.push('');
 
-  reportOutput.value = L.join('\n');
+    lines.push('LEGENDA PI-RADS');
+    lines.push('1 - Molto bassa (tumore clinicamente significativo molto improbabile)');
+    lines.push('2 - Bassa (improbabile)   3 - Intermedia (dubbia)   4 - Alta (probabile)   5 - Molto alta (molto probabile)');
+    lines.push('PZ = zona periferica, TZ = zona di transizione, AFS = stroma fibromuscolare anteriore, CZ = zona centrale');
+    lines.push('');
+
+    lines.push('RIFERIMENTI BIBLIOGRAFICI');
+    REFERENCES.forEach((r, i) => lines.push(`[${i+1}] ${r}`));
+    lines.push('');
+  }
+
+  reportOutput.value = lines.join('\n');
 }
 
 document.getElementById('regenReportBtn').addEventListener('click', () => {
