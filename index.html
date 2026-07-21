@@ -88,11 +88,14 @@
     #root .print-area { display:block; position:absolute; left:0; top:0; width:100%; background:#fff; color:#111; padding: 20px; font-family: 'IBM Plex Sans', Arial, sans-serif; }
     #root .print-area .ph { font-family:'IBM Plex Mono',monospace; white-space:pre-wrap; font-size:12px; line-height:1.55; }
     #root .print-area .ph-header { display:flex; justify-content:space-between; border-bottom: 2px solid #222; padding-bottom:10px; margin-bottom:14px; }
-    #root .print-area .ph-title { text-align:center; font-size:16px; font-weight:700; margin: 10px 0 4px 0; }
+    #root .print-area .ph-title { text-align:center; font-size:16px; font-weight:700; margin: 10px 0 14px 0; }
     #root .print-area .ph-patient-box { border:1px solid #222; padding:8px 12px; font-size:12px; }
-    #root .print-area .ph-maps { display:flex; gap:14px; justify-content:center; margin: 14px 0; flex-wrap:wrap; }
-    #root .print-area .ph-maps svg { width: 140px; height:auto; }
-    #root .print-area .ph-maps figcaption { text-align:center; font-size:10px; color:#444; }
+    #root .print-area .ph-body { display:flex; gap:24px; align-items:flex-start; }
+    #root .print-area .ph-left { flex: 1 1 auto; min-width:0; }
+    #root .print-area .ph-right { flex: 0 0 190px; display:flex; flex-direction:column; gap:14px; }
+    #root .print-area .ph-map-fig { margin:0; }
+    #root .print-area .ph-map-fig svg { width: 170px; height:auto; }
+    #root .print-area .ph-map-fig figcaption { text-align:center; font-size:10.5px; color:#333; font-weight:600; margin-top:3px; }
   }
 </style>
 
@@ -185,7 +188,6 @@ root.innerHTML = `
           <button class="primary" id="printReportBtn" style="width:auto;margin-top:0;padding:7px 14px;">Stampa referto</button>
         </div>
       </div>
-      <div style="font-size:10.5px;color:var(--text-dim);margin-bottom:8px;">Formato a caselle di spunta ispirato allo stile dei template ESGAR (ESGAR Rectal Imaging Guideline Group, Eur Radiol 2026, CC BY 4.0) &mdash; contenuto specifico PI-RADS prostata, non derivato dal contenuto di quel documento. Il testo qui sotto è modificabile: eventuali correzioni manuali restano finché non aggiungi/rimuovi una lesione (a quel punto il testo si rigenera dai dati).</div>
       <textarea id="reportOutput" class="report-textarea"></textarea>
     </div>
     <div class="attribution">Case courtesy of Henry Knipe, <a href="https://radiopaedia.org" target="_blank" rel="noopener">Radiopaedia.org</a>, rID: 200199 &middot; CC BY-NC-SA &middot; path vettoriali ridisegnati a mano</div>
@@ -998,7 +1000,6 @@ document.getElementById('printReportBtn').addEventListener('click', () => {
   const printArea = document.getElementById('printArea');
   const sectorPattern = /^(base|mid|apex)_(AFS|TZa|TZp|PZa|PZpl|PZpm|CZ)_(R|L)$/;
 
-  // which sector ids (per level) actually have a registered lesion
   const litSectorsByLevel = {};
   LEVEL_ORDER.forEach(l => litSectorsByLevel[l] = new Set());
   Object.keys(lesions).forEach(id => {
@@ -1008,23 +1009,20 @@ document.getElementById('printReportBtn').addEventListener('click', () => {
     }
   });
 
-  const levelsWithLesions = LEVEL_ORDER.filter(l => litSectorsByLevel[l].size > 0);
-
-  let mapsHtml = '';
-  if (levelsWithLesions.length > 0) {
-    mapsHtml = '<div class="ph-maps">' + levelsWithLesions.map(level => {
-      const svgEl = document.querySelector(`#root .disc-layer[data-level="${level}"] svg`);
-      const clone = svgEl.cloneNode(true);
-      const lit = litSectorsByLevel[level];
+  const mapsHtml = LEVEL_ORDER.map(level => {
+    const svgEl = document.querySelector(`#root .disc-layer[data-level="${level}"] svg`);
+    const clone = svgEl.cloneNode(true);
+    const lit = litSectorsByLevel[level];
+    if (lit.size > 0) {
       clone.querySelectorAll('[id]').forEach(el => {
         if (el.id.match(sectorPattern) && !lit.has(el.id)) {
           const existing = el.getAttribute('style') || '';
           el.setAttribute('style', existing + ';filter:grayscale(1) brightness(0.95);');
         }
       });
-      return `<figure style="margin:0"><div>${clone.outerHTML}</div><figcaption>${LEVEL_NAMES[level]}</figcaption></figure>`;
-    }).join('') + '</div>';
-  }
+    }
+    return `<figure class="ph-map-fig"><div>${clone.outerHTML}</div><figcaption>${LEVEL_NAMES[level]}</figcaption></figure>`;
+  }).join('');
 
   printArea.innerHTML = `
     <div class="ph-header">
@@ -1036,8 +1034,12 @@ document.getElementById('printReportBtn').addEventListener('click', () => {
       </div>
     </div>
     <div class="ph-title">RM MULTIPARAMETRICA DELLA PROSTATA</div>
-    ${mapsHtml}
-    <div class="ph">${reportOutput.value.replace(/</g,'&lt;')}</div>
+    <div class="ph-body">
+      <div class="ph-left">
+        <div class="ph">${reportOutput.value.replace(/</g,'&lt;')}</div>
+      </div>
+      <div class="ph-right">${mapsHtml}</div>
+    </div>
   `;
   window.print();
 });
