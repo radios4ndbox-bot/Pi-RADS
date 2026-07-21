@@ -1034,33 +1034,44 @@ function generateReport() {
   L.push(`Indagine condotta mediante acquisizioni multiplanari a diversa pesatura in T1, T2, completata con acquisizioni DW e con acquisizioni dopo somministrazione di mdc (Gadovist, ${meta.mdc != null ? meta.mdc : '..'} mL), secondo protocollo mpRM Prostatica.`);
   L.push('');
   L.push(`PRECEDENTI: ${meta.precedenti || ''}`);
+  L.push('');
   L.push(`QUESITO DIAGNOSTICO: ${meta.indication || 'valutazione prostata.'}`);
+  L.push('');
   L.push(`PSA: ${meta.psa != null ? meta.psa : '..'} ng/ml. PSA density: ${density != null ? density.toFixed(2) : '..'}`);
+  L.push('');
   L.push(`GHIANDOLA PROSTATICA: diametri trasversi massimi di ${meta.ap && meta.lr ? (meta.ap/10).toFixed(1)+' x '+(meta.lr/10).toFixed(1) : '..'} cm, diametro cranio-caudale di ${meta.cc ? (meta.cc/10).toFixed(1) : '..'} cm, per un volume massimo di ${volume ? volume.toFixed(1) : '..'} cc`);
+  L.push('');
 
   L.push('REGIONE PERIFERICA: nella sequenza dominante DWI ' + (pzEntries.length === 0
     ? 'non si apprezzano significative alterazioni di segnale.'
     : pzEntries.map(lesionSentence).join(' ')));
+  L.push('');
 
   L.push('REGIONE TRANSIZIONALE: nella sequenza dominante T2-pesata ' + (tzEntries.length === 0
     ? 'non si apprezzano significative alterazioni di segnale.'
     : tzEntries.map(lesionSentence).join(' ')));
+  L.push('');
 
   L.push('VESCICOLE SEMINALI: ' + (meta.sv === 'suspicious'
     ? `aspetto sospetto per infiltrazione neoplastica${meta.svSide ? ', lato ' + meta.svSide : ''}.`
     : 'nei limiti.'));
+  L.push('');
   L.push('VESCICA: ' + (meta.bladder === 'positive'
     ? (meta.bladderNote || 'reperti patologici.')
     : 'la vescica presenta pareti lievemente ispessite ed irregolari come per ipertrofia della tonaca muscolare.'));
+  L.push('');
   L.push('LINFONODI PELVICI: ' + (meta.nodes === 'suspicious'
     ? `linfonodo sospetto in sede ${meta.nodesSite || '....'}${meta.nodesSize ? ', di ' + meta.nodesSize + ' mm' : ''}.`
     : 'non significative linfoadenomegalie in corrispondenza delle principali catene della pelvi.'));
+  L.push('');
   L.push('FALDA LIQUIDA: ' + (meta.fluid === 'positive'
     ? (meta.fluidNote || 'presente falda liquida periprostatica.')
     : 'non falda liquida.'));
+  L.push('');
   L.push('OSSA: ' + (meta.bones === 'suspicious'
     ? `area sospetta in sede ${meta.bonesSite || '....'}${meta.bonesSize ? ', di ' + meta.bonesSize + ' mm' : ''}.`
     : 'non evidenza di franche lesioni focali nel volume di acquisizione.'));
+  L.push('');
   L.push(`ALTRI RILIEVI: ${meta.altri || ''}`);
   L.push('');
 
@@ -1085,8 +1096,6 @@ function generateReport() {
   L.push('3 = neoplasia significativa dubbia');
   L.push('4 = neoplasia significativa probabile');
   L.push('5 = neoplasia significativa altamente probabile');
-  L.push('');
-  L.push('(Bozza generata automaticamente \u2014 revisione del radiologo obbligatoria prima dell\'inserimento in PACS.)');
 
   reportOutput.value = L.join('\n');
 }
