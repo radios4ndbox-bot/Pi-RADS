@@ -46,6 +46,8 @@
   #root .zone-toggle { display:flex; gap:6px; margin-bottom:12px; }
   #root .zone-toggle button { flex:1; padding:6px; font-size:11.5px; border-radius:4px; border:1px solid var(--line); background:var(--panel-2); color:var(--text-dim); cursor:pointer; }
   #root .zone-toggle button.active { border-color:var(--accent); color:var(--accent); background:#eaf4fc; font-weight:600; }
+  #root .exam-detail { display:flex; gap:8px; margin-top:6px; }
+  #root .exam-detail select, #root .exam-detail input { flex:1; }
 
   #root .result-box { margin-top: 14px; padding: 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel-2); text-align:center; }
   #root .result-cat { font-family:'IBM Plex Mono',monospace; font-size: 28px; font-weight:700; }
@@ -176,25 +178,70 @@ root.innerHTML = `
         <label>Dose mdc (mL)</label>
         <input type="number" id="metaMdc" min="0" step="1" placeholder="10">
       </div>
-      <div class="meta-field" style="flex:1 1 180px">
+      <div class="meta-field" style="flex:1 1 100%">
         <label>Linfonodi pelvici</label>
         <div class="zone-toggle">
           <button data-exam="nodes" data-val="normal" class="exam-toggle active">Non significativi</button>
           <button data-exam="nodes" data-val="suspicious" class="exam-toggle">Sospetti</button>
         </div>
+        <div class="exam-detail" id="detail-nodes" style="display:none">
+          <select id="nodesSite">
+            <option value="">-- sede --</option>
+            <option value="otturatorio">Otturatorio</option>
+            <option value="iliaco esterno">Iliaco esterno</option>
+            <option value="iliaco interno">Iliaco interno</option>
+            <option value="iliaco comune">Iliaco comune</option>
+            <option value="presacrale">Presacrale</option>
+            <option value="inguinale">Inguinale</option>
+            <option value="altro">Altro</option>
+          </select>
+          <input type="number" id="nodesSize" min="0" placeholder="mm">
+        </div>
       </div>
-      <div class="meta-field" style="flex:1 1 180px">
+      <div class="meta-field" style="flex:1 1 100%">
+        <label>Ossa</label>
+        <div class="zone-toggle">
+          <button data-exam="bones" data-val="normal" class="exam-toggle active">Non evidenza di lesioni</button>
+          <button data-exam="bones" data-val="suspicious" class="exam-toggle">Sospette</button>
+        </div>
+        <div class="exam-detail" id="detail-bones" style="display:none">
+          <input type="text" id="bonesSite" placeholder="sede (es. corpo vertebrale L4)">
+          <input type="number" id="bonesSize" min="0" placeholder="mm (opzionale)">
+        </div>
+      </div>
+      <div class="meta-field" style="flex:1 1 100%">
+        <label>Vescica</label>
+        <div class="zone-toggle">
+          <button data-exam="bladder" data-val="negative" class="exam-toggle active">Nella norma</button>
+          <button data-exam="bladder" data-val="positive" class="exam-toggle">Reperti patologici</button>
+        </div>
+        <div class="exam-detail" id="detail-bladder" style="display:none">
+          <input type="text" id="bladderNote" placeholder="descrizione reperto">
+        </div>
+      </div>
+      <div class="meta-field" style="flex:1 1 100%">
         <label>Vescicole seminali</label>
         <div class="zone-toggle">
           <button data-exam="sv" data-val="normal" class="exam-toggle active">Nei limiti</button>
           <button data-exam="sv" data-val="suspicious" class="exam-toggle">Sospette</button>
         </div>
+        <div class="exam-detail" id="detail-sv" style="display:none">
+          <select id="svSide">
+            <option value="">-- lato --</option>
+            <option value="destra">Destra</option>
+            <option value="sinistra">Sinistra</option>
+            <option value="bilaterale">Bilaterale</option>
+          </select>
+        </div>
       </div>
-      <div class="meta-field" style="flex:1 1 180px">
-        <label>Ossa</label>
+      <div class="meta-field" style="flex:1 1 100%">
+        <label>Falda liquida periprostatica</label>
         <div class="zone-toggle">
-          <button data-exam="bones" data-val="normal" class="exam-toggle active">Non evidenza di lesioni</button>
-          <button data-exam="bones" data-val="suspicious" class="exam-toggle">Sospette</button>
+          <button data-exam="fluid" data-val="negative" class="exam-toggle active">Assente</button>
+          <button data-exam="fluid" data-val="positive" class="exam-toggle">Presente</button>
+        </div>
+        <div class="exam-detail" id="detail-fluid" style="display:none">
+          <input type="text" id="fluidNote" placeholder="es. modica quantità">
         </div>
       </div>
       <div class="meta-field" style="flex:1 1 260px">
@@ -880,7 +927,8 @@ function updateLesionCountBadge() {
 
 // ---------- exam metadata + report generation ----------
 const meta = { institute:'', patient:'', dob:'', pid:'', physician:'', indication:'', psa:null, ap:null, lr:null, cc:null,
-  precedenti:'', mdc:null, altri:'', nodes:'normal', sv:'normal', bones:'normal' };
+  precedenti:'', mdc:null, altri:'', nodes:'normal', sv:'normal', bones:'normal',
+  nodesSite:'', nodesSize:null, bonesSite:'', bonesSize:null, bladder:'negative', bladderNote:'', svSide:'', fluid:'negative', fluidNote:'' };
 const metaReadout = document.getElementById('metaReadout');
 const reportOutput = document.getElementById('reportOutput');
 let reportManuallyEdited = false;
@@ -895,11 +943,28 @@ reportOutput.addEventListener('input', () => { reportManuallyEdited = true; });
   });
 });
 
+['nodesSite','nodesSize','bonesSite','bonesSize','bladderNote','svSide','fluidNote'].forEach(id => {
+  document.getElementById(id).addEventListener('input', (e) => {
+    meta[id] = (id === 'nodesSize' || id === 'bonesSize') ? (e.target.value ? Number(e.target.value) : null) : e.target.value;
+    generateReport();
+  });
+  document.getElementById(id).addEventListener('change', () => generateReport());
+});
+
+const EXAM_ON_VALUES = { nodes:'suspicious', bones:'suspicious', bladder:'positive', sv:'suspicious', fluid:'positive' };
+
+function updateExamDetailVisibility(exam) {
+  const detail = document.getElementById(`detail-${exam}`);
+  if (!detail) return;
+  detail.style.display = (meta[exam] === EXAM_ON_VALUES[exam]) ? 'flex' : 'none';
+}
+
 document.querySelectorAll('.exam-toggle').forEach(btn => {
   btn.addEventListener('click', () => {
     const exam = btn.dataset.exam, val = btn.dataset.val;
     meta[exam] = val;
     document.querySelectorAll(`.exam-toggle[data-exam="${exam}"]`).forEach(b => b.classList.toggle('active', b.dataset.val === val));
+    updateExamDetailVisibility(exam);
     generateReport();
   });
 });
@@ -981,11 +1046,21 @@ function generateReport() {
     ? 'non si apprezzano significative alterazioni di segnale.'
     : tzEntries.map(lesionSentence).join(' ')));
 
-  L.push('VESCICOLE SEMINALI: ' + (meta.sv === 'suspicious' ? 'aspetto sospetto per infiltrazione neoplastica.' : 'nei limiti.'));
-  L.push('VESCICA: la vescica presenta pareti lievemente ispessite ed irregolari come per ipertrofia della tonaca muscolare.');
-  L.push('LINFONODI PELVICI: ' + (meta.nodes === 'suspicious' ? 'linfonodi con caratteristiche sospette in corrispondenza delle principali catene della pelvi.' : 'non significative linfoadenomegalie in corrispondenza delle principali catene della pelvi.'));
-  L.push('FALDA LIQUIDA: non falda liquida.');
-  L.push('OSSA: ' + (meta.bones === 'suspicious' ? 'aree ossee con caratteristiche sospette nel volume di acquisizione.' : 'non evidenza di franche lesioni focali nel volume di acquisizione.'));
+  L.push('VESCICOLE SEMINALI: ' + (meta.sv === 'suspicious'
+    ? `aspetto sospetto per infiltrazione neoplastica${meta.svSide ? ', lato ' + meta.svSide : ''}.`
+    : 'nei limiti.'));
+  L.push('VESCICA: ' + (meta.bladder === 'positive'
+    ? (meta.bladderNote || 'reperti patologici.')
+    : 'la vescica presenta pareti lievemente ispessite ed irregolari come per ipertrofia della tonaca muscolare.'));
+  L.push('LINFONODI PELVICI: ' + (meta.nodes === 'suspicious'
+    ? `linfonodo sospetto in sede ${meta.nodesSite || '....'}${meta.nodesSize ? ', di ' + meta.nodesSize + ' mm' : ''}.`
+    : 'non significative linfoadenomegalie in corrispondenza delle principali catene della pelvi.'));
+  L.push('FALDA LIQUIDA: ' + (meta.fluid === 'positive'
+    ? (meta.fluidNote || 'presente falda liquida periprostatica.')
+    : 'non falda liquida.'));
+  L.push('OSSA: ' + (meta.bones === 'suspicious'
+    ? `area sospetta in sede ${meta.bonesSite || '....'}${meta.bonesSize ? ', di ' + meta.bonesSize + ' mm' : ''}.`
+    : 'non evidenza di franche lesioni focali nel volume di acquisizione.'));
   L.push(`ALTRI RILIEVI: ${meta.altri || ''}`);
   L.push('');
 
@@ -996,9 +1071,9 @@ function generateReport() {
     const idx = entries[0];
     L.push(`Reperto principale: PI-RADS ${idx.category}, localizzato in ${zoneReferencePhrase(idx)}.`);
     if (entries.length > 1) L.push(`Ulteriori ${entries.length - 1} reperto/i di categoria inferiore (vedi sopra).`);
-    L.push('Linfonodi pelvici: ' + (meta.nodes === 'suspicious' ? 'sospetti.' : 'non significativi.') +
-      '  Vescicole seminali: ' + (meta.sv === 'suspicious' ? 'sospette.' : 'nei limiti.') +
-      '  Reperti ossei: ' + (meta.bones === 'suspicious' ? 'sospetti.' : 'non evidenti.'));
+    L.push('Linfonodi pelvici: ' + (meta.nodes === 'suspicious' ? `sospetti (${meta.nodesSite || '....'}${meta.nodesSize ? ', ' + meta.nodesSize + ' mm' : ''}).` : 'non significativi.') +
+      '  Vescicole seminali: ' + (meta.sv === 'suspicious' ? `sospette${meta.svSide ? ' ('+meta.svSide+')' : ''}.` : 'nei limiti.') +
+      '  Reperti ossei: ' + (meta.bones === 'suspicious' ? `sospetti (${meta.bonesSite || '....'}${meta.bonesSize ? ', ' + meta.bonesSize + ' mm' : ''}).` : 'non evidenti.'));
     if (idx.category >= 4) L.push('Si raccomanda biopsia mirata (fusion-guided) sul settore indicato.');
     else if (idx.category === 3) L.push('Reperto da valutare in base al contesto clinico (PSA, PSA density, precedenti biopsie).');
     else L.push('Follow-up secondo protocollo clinico.');
