@@ -79,6 +79,21 @@
   #root .report-section { margin-top: 18px; background: var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px; box-shadow: 0 1px 3px rgba(30,60,90,0.06); }
   #root .report-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
   #root .report-textarea { width:100%; min-height: 320px; background:#fbfdff; color:var(--text); border:1px solid var(--line); border-radius:6px; padding:14px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.6; resize: vertical; white-space: pre-wrap; }
+
+  #root .print-area { display:none; }
+
+  @media print {
+    body * { visibility: hidden; }
+    #root .print-area, #root .print-area * { visibility: visible; }
+    #root .print-area { display:block; position:absolute; left:0; top:0; width:100%; background:#fff; color:#111; padding: 20px; font-family: 'IBM Plex Sans', Arial, sans-serif; }
+    #root .print-area .ph { font-family:'IBM Plex Mono',monospace; white-space:pre-wrap; font-size:12px; line-height:1.55; }
+    #root .print-area .ph-header { display:flex; justify-content:space-between; border-bottom: 2px solid #222; padding-bottom:10px; margin-bottom:14px; }
+    #root .print-area .ph-title { text-align:center; font-size:16px; font-weight:700; margin: 10px 0 4px 0; }
+    #root .print-area .ph-patient-box { border:1px solid #222; padding:8px 12px; font-size:12px; }
+    #root .print-area .ph-maps { display:flex; gap:14px; justify-content:center; margin: 14px 0; flex-wrap:wrap; }
+    #root .print-area .ph-maps svg { width: 140px; height:auto; }
+    #root .print-area .ph-maps figcaption { text-align:center; font-size:10px; color:#444; }
+  }
 </style>
 
 <script>
@@ -102,6 +117,28 @@ root.innerHTML = `
       <div class="badge" id="lesionCountBadge">0 lesioni registrate</div>
     </header>
     <div class="meta-panel" id="metaPanel">
+      <div class="meta-field">
+        <label>Istituto / Divisione</label>
+        <input type="text" id="metaInstitute" placeholder="es. Divisione di Radiologia">
+      </div>
+      <div class="meta-field">
+        <label>Paziente</label>
+        <input type="text" id="metaPatient" placeholder="Nome Cognome">
+      </div>
+      <div class="meta-field small">
+        <label>Data nascita</label>
+        <input type="text" id="metaDob" placeholder="gg/mm/aaaa">
+      </div>
+      <div class="meta-field small">
+        <label>ID Paziente</label>
+        <input type="text" id="metaPid" placeholder="ID">
+      </div>
+      <div class="meta-field">
+        <label>Medico refertante</label>
+        <input type="text" id="metaPhysician" placeholder="Dott. ...">
+      </div>
+    </div>
+    <div class="meta-panel" id="metaPanel2">
       <div class="meta-field">
         <label>Indicazione clinica</label>
         <input type="text" id="metaIndication" placeholder="es. PSA elevato, screening">
@@ -142,13 +179,18 @@ root.innerHTML = `
     <div class="report-section">
       <div class="report-head">
         <h3 style="margin:0">Referto strutturato</h3>
-        <button class="secondary" id="copyReportBtn" style="width:auto;margin-top:0;padding:7px 14px;">Copia negli appunti</button>
+        <div style="display:flex;gap:8px;">
+          <button class="secondary" id="regenReportBtn" style="width:auto;margin-top:0;padding:7px 14px;">Rigenera dai dati</button>
+          <button class="secondary" id="copyReportBtn" style="width:auto;margin-top:0;padding:7px 14px;">Copia negli appunti</button>
+          <button class="primary" id="printReportBtn" style="width:auto;margin-top:0;padding:7px 14px;">Stampa referto</button>
+        </div>
       </div>
-      <div style="font-size:10.5px;color:var(--text-dim);margin-bottom:8px;">Formato a caselle di spunta ispirato allo stile dei template ESGAR (ESGAR Rectal Imaging Guideline Group, Eur Radiol 2026, CC BY 4.0) &mdash; contenuto specifico PI-RADS prostata, non derivato dal contenuto di quel documento.</div>
-      <textarea id="reportOutput" class="report-textarea" readonly></textarea>
+      <div style="font-size:10.5px;color:var(--text-dim);margin-bottom:8px;">Formato a caselle di spunta ispirato allo stile dei template ESGAR (ESGAR Rectal Imaging Guideline Group, Eur Radiol 2026, CC BY 4.0) &mdash; contenuto specifico PI-RADS prostata, non derivato dal contenuto di quel documento. Il testo qui sotto è modificabile: eventuali correzioni manuali restano finché non aggiungi/rimuovi una lesione (a quel punto il testo si rigenera dai dati).</div>
+      <textarea id="reportOutput" class="report-textarea"></textarea>
     </div>
     <div class="attribution">Case courtesy of Henry Knipe, <a href="https://radiopaedia.org" target="_blank" rel="noopener">Radiopaedia.org</a>, rID: 200199 &middot; CC BY-NC-SA &middot; path vettoriali ridisegnati a mano</div>
   </div>
+  <div id="printArea" class="print-area"></div>
 `;
 
 const discLayers = document.getElementById('discLayers');
@@ -545,7 +587,7 @@ function computeCategory(entry) {
   if (entry.group === 'PZ') {
     const d = entry.dwi;
     if (!d) return null;
-    if (d === 3) return entry.dce === 'positive' ? 4 : 3;
+    if (d === 3) return entry.dce === 'yes' ? 4 : 3;
     return d;
   }
   if (entry.group === 'TZ') {
@@ -642,12 +684,11 @@ function renderSidePanel() {
   if (group === 'PZ' && entry.dwi === 3) {
     html += `
       <div class="field">
-        <label>DCE (dynamic contrast enhancement)</label>
-        <select id="dceSelect">
-          <option value="">-- seleziona --</option>
-          <option value="negative" ${entry.dce==='negative'?'selected':''}>Negativo (nessun enhancement focale precoce)</option>
-          <option value="positive" ${entry.dce==='positive'?'selected':''}>Positivo (enhancement focale precoce)</option>
-        </select>
+        <label>DCE (enhancement focale precoce)</label>
+        <div class="zone-toggle">
+          <button data-dce="no" class="${entry.dce==='no'?'active':''}">No</button>
+          <button data-dce="yes" class="${entry.dce==='yes'?'active':''}">S\u00ec</button>
+        </div>
       </div>
     `;
   }
@@ -722,9 +763,11 @@ function renderSidePanel() {
   });
 
   if (group === 'PZ' && entry.dwi === 3) {
-    document.getElementById('dceSelect').addEventListener('change', (e) => {
-      entry.dce = e.target.value || null;
-      renderSidePanel();
+    sidePanel.querySelectorAll('[data-dce]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        entry.dce = btn.dataset.dce;
+        renderSidePanel();
+      });
     });
   }
   if (group === 'TZ') {
@@ -799,9 +842,18 @@ function updateLesionCountBadge() {
 }
 
 // ---------- exam metadata + report generation ----------
-const meta = { indication:'', psa:null, ap:null, lr:null, cc:null };
+const meta = { institute:'', patient:'', dob:'', pid:'', physician:'', indication:'', psa:null, ap:null, lr:null, cc:null };
 const metaReadout = document.getElementById('metaReadout');
 const reportOutput = document.getElementById('reportOutput');
+let reportManuallyEdited = false;
+reportOutput.addEventListener('input', () => { reportManuallyEdited = true; });
+
+['metaInstitute','metaPatient','metaDob','metaPid','metaPhysician'].forEach(id => {
+  document.getElementById(id).addEventListener('input', (e) => {
+    const map = { metaInstitute:'institute', metaPatient:'patient', metaDob:'dob', metaPid:'pid', metaPhysician:'physician' };
+    meta[map[id]] = e.target.value;
+  });
+});
 
 function computeVolumeDensity() {
   if (!(meta.ap && meta.lr && meta.cc)) return { volume:null, density:null };
@@ -831,42 +883,54 @@ function updateMetaReadout() {
 function checkbox(checked) { return checked ? '\u2612' : '\u2610'; }
 const ZONE_ORIGIN_LABEL = { R: 'destro', L: 'sinistro' };
 
+const REFERENCES = [
+  'Turkbey B, et al. PI-RADS Steering Committee: The PI-RADS Multiparametric MRI and MRI-directed Biopsy Pathway. Eur Urol 2019.',
+  'Kryvenko ON, Epstein JI. Prostate cancer grading: a decade after the 2005 modified system. Urology 2014;83(4):869-874.',
+  'Humphrey PA, et al. The 2016 WHO Classification of Tumours of the Urinary System and Male Genital Organs. Eur Urol 2016;70(1):106-119.',
+  'Sathianathen NJ, et al. Negative predictive value of multiparametric MRI in biopsy-naive men. Eur Urol 2020;78:402-414.',
+];
+
 function generateReport() {
+  if (reportManuallyEdited) return; // respect manual edits until data actually changes
   const entries = allLesionsFlat().filter(e => e.category)
     .sort((a,b) => b.category - a.category);
   const { volume, density } = computeVolumeDensity();
 
   let lines = [];
-  lines.push('REFERTO STRUTTURATO RM PROSTATA MULTIPARAMETRICA');
-  lines.push('- PI-RADS v2.1 -');
+  lines.push('RM MULTIPARAMETRICA DELLA PROSTATA');
+  lines.push('- Referto strutturato PI-RADS v2.1 -');
   lines.push('');
-  lines.push('DATI CLINICI');
-  lines.push(`Indicazione clinica: ${meta.indication || '....'}`);
-  lines.push(`PSA sierico: ${meta.psa != null ? meta.psa + ' ng/ml' : '....'}`);
-  lines.push('');
-  lines.push('BIOMETRIA');
+
+  if (meta.patient || meta.dob || meta.pid) {
+    lines.push(`Paziente: ${meta.patient || '....'}    Data di nascita: ${meta.dob || '....'}    ID: ${meta.pid || '....'}`);
+    lines.push('');
+  }
+
+  if (meta.indication || meta.psa != null) {
+    lines.push('DATI CLINICI');
+    if (meta.indication) lines.push(`Indicazione clinica: ${meta.indication}`);
+    if (meta.psa != null) lines.push(`PSA sierico: ${meta.psa} ng/ml`);
+    lines.push('');
+  }
+
   if (meta.ap && meta.lr && meta.cc) {
+    lines.push('BIOMETRIA');
     lines.push(`Diametri (AP x LR x CC): ${meta.ap} x ${meta.lr} x ${meta.cc} mm`);
     lines.push(`Volume stimato: ${volume.toFixed(1)} cc`);
     if (density != null) {
       lines.push(`PSA density: ${density.toFixed(2)} ng/ml/cc    ${checkbox(density < 0.20)} <0.20   ${checkbox(density >= 0.20)} \u22650.20`);
     }
-  } else {
-    lines.push('Diametri (AP x LR x CC): .... x .... x .... mm');
-    lines.push('Volume stimato: .... cc');
-    lines.push(`PSA density: .... ng/ml/cc    ${checkbox(false)} <0.20   ${checkbox(false)} \u22650.20`);
+    lines.push('');
   }
-  lines.push('');
-  lines.push('REPERTI PER SETTORE');
-  if (entries.length === 0) {
-    lines.push('Nessuna lesione target registrata.');
-  } else {
+
+  if (entries.length > 0) {
+    lines.push('REPERTI PER SETTORE');
     entries.forEach((e, i) => {
       lines.push(`[Lesione ${i+1} \u2014 ${e.zone}, ${LEVEL_NAMES[e.level]}, lato ${ZONE_ORIGIN_LABEL[e.side]}]`);
       if (e.group === 'PZ') {
         lines.push(`  DWI/ADC: ${[1,2,3,4,5].map(n => `${checkbox(e.dwi===n)}${n}`).join('  ')}`);
         if (e.dwi === 3) {
-          lines.push(`  DCE: ${checkbox(e.dce==='negative')} Negativo   ${checkbox(e.dce==='positive')} Positivo`);
+          lines.push(`  DCE: ${checkbox(e.dce==='no')} No   ${checkbox(e.dce==='yes')} S\u00ec`);
         }
       } else {
         lines.push(`  T2W: ${[1,2,3,4,5].map(n => `${checkbox(e.t2===n)}${n}`).join('  ')}`);
@@ -874,25 +938,12 @@ function generateReport() {
           lines.push(`  DWI/ADC (upgrade): ${[1,2,3,4,5].map(n => `${checkbox(e.dwi===n)}${n}`).join('  ')}`);
         }
       }
-      lines.push(`  Diametro massimo: ${e.size ? e.size + ' mm' : '.... mm'}`);
+      if (e.size) lines.push(`  Diametro massimo: ${e.size} mm`);
       lines.push(`  Categoria PI-RADS: ${[1,2,3,4,5].map(n => `${checkbox(e.category===n)}${n}`).join('  ')}`);
       lines.push('');
     });
-  }
-  lines.push('ESTENSIONE EXTRACAPSULARE (ECE)');
-  lines.push(`${checkbox(false)} Assente   ${checkbox(false)} Equivoca   ${checkbox(false)} Sospetta    Localizzazione: ....`);
-  lines.push('(sezione da collegare al modulo ECE/SVI per settore \u2014 non ancora integrata)');
-  lines.push('');
-  lines.push('INVASIONE VESCICOLE SEMINALI (SVI)');
-  lines.push(`${checkbox(false)} Assente   ${checkbox(false)} Equivoca   ${checkbox(false)} Sospetta`);
-  lines.push('');
-  lines.push('STADIO LOCALE SUGGERITO (cT)');
-  lines.push(`${checkbox(false)} cT2   ${checkbox(false)} cT3a   ${checkbox(false)} cT3b   ${checkbox(false)} cT4`);
-  lines.push('');
-  lines.push('CONCLUSIONE');
-  if (entries.length === 0) {
-    lines.push('Nessun reperto target identificato in questo esame.');
-  } else {
+
+    lines.push('CONCLUSIONE');
     const idx = entries[0];
     lines.push(`Lesione indice: settore ${idx.zone}, ${LEVEL_NAMES[idx.level]}, lato ${ZONE_ORIGIN_LABEL[idx.side]} \u2014 PI-RADS ${idx.category}.`);
     lines.push(`Reperti totali identificati: ${entries.length}.`);
@@ -903,12 +954,33 @@ function generateReport() {
     } else {
       lines.push('Raccomandazione: follow-up secondo protocollo clinico.');
     }
+    lines.push('');
+
+    if (meta.physician) {
+      lines.push(`Medico refertante: ${meta.physician}`);
+      lines.push('');
+    }
+
+    lines.push('LEGENDA PI-RADS');
+    lines.push('1 - Molto bassa (tumore clinicamente significativo molto improbabile)');
+    lines.push('2 - Bassa (improbabile)   3 - Intermedia (dubbia)   4 - Alta (probabile)   5 - Molto alta (molto probabile)');
+    lines.push('PZ = zona periferica, TZ = zona di transizione, AFS = stroma fibromuscolare anteriore, CZ = zona centrale');
+    lines.push('');
+
+    lines.push('RIFERIMENTI BIBLIOGRAFICI');
+    REFERENCES.forEach((r, i) => lines.push(`[${i+1}] ${r}`));
+    lines.push('');
   }
-  lines.push('');
+
   lines.push('(Bozza generata automaticamente \u2014 revisione del radiologo obbligatoria prima dell\'inserimento in PACS.)');
 
   reportOutput.value = lines.join('\n');
 }
+
+document.getElementById('regenReportBtn').addEventListener('click', () => {
+  reportManuallyEdited = false;
+  generateReport();
+});
 
 document.getElementById('copyReportBtn').addEventListener('click', () => {
   reportOutput.select();
@@ -920,6 +992,54 @@ document.getElementById('copyReportBtn').addEventListener('click', () => {
   }).catch(() => {
     document.execCommand('copy');
   });
+});
+
+document.getElementById('printReportBtn').addEventListener('click', () => {
+  const printArea = document.getElementById('printArea');
+  const sectorPattern = /^(base|mid|apex)_(AFS|TZa|TZp|PZa|PZpl|PZpm|CZ)_(R|L)$/;
+
+  // which sector ids (per level) actually have a registered lesion
+  const litSectorsByLevel = {};
+  LEVEL_ORDER.forEach(l => litSectorsByLevel[l] = new Set());
+  Object.keys(lesions).forEach(id => {
+    if (lesions[id].some(e => e.category)) {
+      const m = id.match(sectorPattern);
+      if (m) litSectorsByLevel[m[1]].add(id);
+    }
+  });
+
+  const levelsWithLesions = LEVEL_ORDER.filter(l => litSectorsByLevel[l].size > 0);
+
+  let mapsHtml = '';
+  if (levelsWithLesions.length > 0) {
+    mapsHtml = '<div class="ph-maps">' + levelsWithLesions.map(level => {
+      const svgEl = document.querySelector(`#root .disc-layer[data-level="${level}"] svg`);
+      const clone = svgEl.cloneNode(true);
+      const lit = litSectorsByLevel[level];
+      clone.querySelectorAll('[id]').forEach(el => {
+        if (el.id.match(sectorPattern) && !lit.has(el.id)) {
+          const existing = el.getAttribute('style') || '';
+          el.setAttribute('style', existing + ';filter:grayscale(1) brightness(0.95);');
+        }
+      });
+      return `<figure style="margin:0"><div>${clone.outerHTML}</div><figcaption>${LEVEL_NAMES[level]}</figcaption></figure>`;
+    }).join('') + '</div>';
+  }
+
+  printArea.innerHTML = `
+    <div class="ph-header">
+      <div>${meta.institute ? '<strong>'+meta.institute+'</strong>' : ''}</div>
+      <div class="ph-patient-box">
+        ${meta.patient ? '<b>'+meta.patient+'</b><br>' : ''}
+        ${meta.dob ? 'Data di nascita: '+meta.dob+'<br>' : ''}
+        ${meta.pid ? 'ID Paziente: '+meta.pid : ''}
+      </div>
+    </div>
+    <div class="ph-title">RM MULTIPARAMETRICA DELLA PROSTATA</div>
+    ${mapsHtml}
+    <div class="ph">${reportOutput.value.replace(/</g,'&lt;')}</div>
+  `;
+  window.print();
 });
 
 function recolorSector(id) {
