@@ -106,13 +106,15 @@
     #root .print-area { display:block !important; background:#fff; color:#111; font-family:'IBM Plex Sans',Arial,sans-serif; padding:10px; }
     #root .print-area .ph-header { display:flex; justify-content:space-between; border-bottom:2px solid #222; padding-bottom:8px; margin-bottom:10px; font-size:11px; }
     #root .print-area .ph-title { text-align:center; font-size:15px; font-weight:700; margin:6px 0 10px 0; }
-    #root .print-area .ph-maps { display:flex; gap:10px; justify-content:center; margin-bottom:12px; }
-    #root .print-area .ph-maps svg { width:110px; height:auto; }
-    #root .print-area .ph-maps figcaption { text-align:center; font-size:9px; color:#333; }
-    #root .print-area table { width:100%; border-collapse:collapse; font-size:9.5px; margin-bottom:12px; }
-    #root .print-area th, #root .print-area td { border:1px solid #999; padding:3px 4px; text-align:center; }
+    #root .print-area table { width:100%; border-collapse:collapse; font-size:9px; margin-bottom:14px; }
+    #root .print-area th, #root .print-area td { border:1px solid #999; padding:3px 3px; text-align:center; }
     #root .print-area th { background:#eee; }
-    #root .print-area .ph-section-title { font-weight:700; font-size:11px; margin:10px 0 4px 0; }
+    #root .print-area .ph-body { display:flex; gap:18px; align-items:flex-start; }
+    #root .print-area .ph-left { flex:1 1 auto; min-width:0; }
+    #root .print-area .ph-right { flex:0 0 160px; display:flex; flex-direction:column; gap:12px; }
+    #root .print-area .ph-map-fig { margin:0; }
+    #root .print-area .ph-map-fig svg { width:150px; height:auto; }
+    #root .print-area .ph-map-fig figcaption { text-align:center; font-size:9px; color:#333; font-weight:600; margin-top:2px; }
     #root .print-area .ph-text { font-size:11px; line-height:1.5; white-space:pre-wrap; }
   }
 </style>
@@ -1964,6 +1966,7 @@ function buildPrintView() {
     const svgEl = document.querySelector(svgSelector);
     if (!svgEl) return '';
     const clone = svgEl.cloneNode(true);
+    if (litSectors.size === 0) return clone.outerHTML; // nothing registered yet: show natural colors, nothing to contrast
     clone.querySelectorAll('[id]').forEach(el => {
       if (idTest(el.id) && !isLitMatch(el.id)) {
         el.style.setProperty('filter', 'grayscale(1) brightness(1.05)', 'important');
@@ -2004,13 +2007,21 @@ function buildPrintView() {
       <div>${meta.patient?('<b>'+meta.patient+'</b><br>'):''}${meta.pid?('ID: '+meta.pid):''}</div>
     </div>
     <div class="ph-title">RM MULTIPARAMETRICA DELLA PROSTATA</div>
-    <div class="ph-maps">
-      ${axialSvg?`<figure style="margin:0">${axialSvg.outerHTML}<figcaption>${LEVEL_NAMES[activeLevel]}</figcaption></figure>`:''}
-      ${coronalHtml?`<figure style="margin:0">${coronalHtml}<figcaption>Coronale</figcaption></figure>`:''}
-      ${sagittalHtml?`<figure style="margin:0">${sagittalHtml}<figcaption>Sagittale ${activeSide?activeSide.dataset.side:''}</figcaption></figure>`:''}
-    </div>
     ${tableHtml}
-    <div class="ph-text">${buildReportLines(false).join('\n').replace(/</g,'&lt;')}</div>
+    <div class="ph-body">
+      <div class="ph-left">
+        <div class="ph-text">${(() => {
+          const lines = buildReportLines(false);
+          const startIdx = lines.findIndex(l => l.startsWith('INDICAZIONI:'));
+          return (startIdx >= 0 ? lines.slice(startIdx) : lines).join('\n').replace(/</g,'&lt;');
+        })()}</div>
+      </div>
+      <div class="ph-right">
+        ${axialSvg?`<figure class="ph-map-fig">${axialSvg.outerHTML}<figcaption>${LEVEL_NAMES[activeLevel]}</figcaption></figure>`:''}
+        ${coronalHtml?`<figure class="ph-map-fig">${coronalHtml}<figcaption>Coronale</figcaption></figure>`:''}
+        ${sagittalHtml?`<figure class="ph-map-fig">${sagittalHtml}<figcaption>Sagittale ${activeSide?activeSide.dataset.side:''}</figcaption></figure>`:''}
+      </div>
+    </div>
   `;
 }
 
