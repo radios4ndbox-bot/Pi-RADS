@@ -57,6 +57,18 @@
   #root .draw-toolbar-mini.active { display:flex; }
 
   #root .below-zone { display:grid; grid-template-columns: 340px 1fr; gap:16px; align-items:start; }
+  #root .panel-title-clickable { cursor:pointer; }
+  #root .panel-title-clickable:hover { color:var(--accent); }
+  #root .zoom-hint { font-size:9px; color:var(--accent); font-weight:400; text-transform:none; letter-spacing:0; margin-left:4px; }
+
+  #root .panel-modal { display:none; position:fixed; inset:0; z-index:100; align-items:center; justify-content:center; }
+  #root .panel-modal.open { display:flex; }
+  #root .panel-modal-backdrop { position:absolute; inset:0; background:rgba(16,32,47,.55); }
+  #root .panel-modal-box { position:relative; background:#fff; border-radius:10px; padding:16px; width:min(680px, 92vw); max-height:92vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,.3); }
+  #root .panel-modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; font-weight:700; color:#10202f; }
+  #root .panel-modal-close { font-size:11.5px; padding:6px 12px; border-radius:6px; border:1px solid var(--line); background:var(--panel-2); color:var(--text-dim); cursor:pointer; }
+  #root .panel-modal-body { overflow:auto; }
+  #root .panel-modal-body .draw-wrap { max-width:520px; margin:0 auto; }
   @media (max-width: 1000px) { #root .below-zone { grid-template-columns: 1fr; } }
 
   #root .meta-panel { background:#fff; border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(30,60,90,.06); }
@@ -114,6 +126,7 @@
 
   #root .print-area { display:none; }
   @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
     #root .wrap > *:not(.print-area) { display:none !important; }
     #root .print-area { display:block !important; background:#fff; color:#111; font-family:'IBM Plex Sans',Arial,sans-serif; padding:10px; }
     #root .print-area .ph-header { display:flex; justify-content:space-between; border-bottom:2px solid #222; padding-bottom:8px; margin-bottom:10px; font-size:11px; }
@@ -162,9 +175,8 @@ root.innerHTML = `
         <div id="discLayers"></div>
         <div id="drawOverlayHolderAxial" class="draw-overlay-holder"></div>
         <div class="draw-toolbar" id="drawToolbarAxial">
-          <button class="pen-btn active" data-pen="2" data-panel="axial">sottile</button>
-          <button class="pen-btn" data-pen="4" data-panel="axial">media</button>
-          <button class="pen-btn" data-pen="7" data-panel="axial">spessa</button>
+          <button class="pen-btn active" data-tool="pen" data-panel="axial">Penna</button>
+          <button class="pen-btn" data-tool="ellipse" data-panel="axial">Ellisse</button>
           <button class="draw-tb-btn" data-clear="axial">Cancella</button>
           <button class="draw-tb-btn primary-tb" data-done="axial">Fine disegno</button>
         </div>
@@ -176,30 +188,28 @@ root.innerHTML = `
       </div>
 
       <div class="side-panel">
-        <h3>Coronale</h3>
+        <h3 class="panel-title-clickable" data-openpanel="coronal">Coronale <span class="zoom-hint">&#128470; ingrandisci</span></h3>
         <div class="draw-wrap">
           <div class="svg-holder" id="coronalHolder"></div>
           <div id="drawOverlayHolderCoronal" class="draw-overlay-holder"></div>
         </div>
         <div class="draw-toolbar-mini" id="drawToolbarCoronal">
-          <button class="pen-btn active" data-pen="2" data-panel="coronal">sottile</button>
-          <button class="pen-btn" data-pen="4" data-panel="coronal">media</button>
-          <button class="pen-btn" data-pen="7" data-panel="coronal">spessa</button>
+          <button class="pen-btn active" data-tool="pen" data-panel="coronal">Penna</button>
+          <button class="pen-btn" data-tool="ellipse" data-panel="coronal">Ellisse</button>
           <button class="draw-tb-btn" data-clear="coronal">Cancella</button>
           <button class="draw-tb-btn primary-tb" data-done="coronal">Fine</button>
         </div>
       </div>
 
       <div class="side-panel">
-        <h3>Sagittale <span class="side-tag" id="sagSideTag">R</span></h3>
+        <h3 class="panel-title-clickable" data-openpanel="sagittal">Sagittale <span class="side-tag" id="sagSideTag">R</span> <span class="zoom-hint">&#128470; ingrandisci</span></h3>
         <div class="draw-wrap">
           <div class="svg-holder" id="sagittalHolder"></div>
           <div id="drawOverlayHolderSagittal" class="draw-overlay-holder"></div>
         </div>
         <div class="draw-toolbar-mini" id="drawToolbarSagittal">
-          <button class="pen-btn active" data-pen="2" data-panel="sagittal">sottile</button>
-          <button class="pen-btn" data-pen="4" data-panel="sagittal">media</button>
-          <button class="pen-btn" data-pen="7" data-panel="sagittal">spessa</button>
+          <button class="pen-btn active" data-tool="pen" data-panel="sagittal">Penna</button>
+          <button class="pen-btn" data-tool="ellipse" data-panel="sagittal">Ellisse</button>
           <button class="draw-tb-btn" data-clear="sagittal">Cancella</button>
           <button class="draw-tb-btn primary-tb" data-done="sagittal">Fine</button>
         </div>
@@ -258,6 +268,16 @@ root.innerHTML = `
           </div>
           <textarea id="reportOutput" class="report-textarea"></textarea>
         </div>
+      </div>
+    </div>
+    <div class="panel-modal" id="panelModal">
+      <div class="panel-modal-backdrop" id="panelModalBackdrop"></div>
+      <div class="panel-modal-box">
+        <div class="panel-modal-head">
+          <span id="panelModalTitle">Vista ingrandita</span>
+          <button class="panel-modal-close" id="panelModalClose">&times; Chiudi</button>
+        </div>
+        <div class="panel-modal-body" id="panelModalBody"></div>
       </div>
     </div>
     <div id="printArea" class="print-area"></div>
@@ -1525,7 +1545,7 @@ function setSvHighlight(side) {
 // DRAWING-TOOL STATE (declared early: setLevel() below needs to call into it)
 // ============================================================
 let activePanel = null;
-let currentPenWidth = 2;
+let currentTool = 'pen'; // 'pen' | 'ellipse'
 let isDrawing = false;
 let rawPoints = [];
 let liveStrokeEl = null;
@@ -1889,22 +1909,46 @@ function svgPointFromEvent(panel, evt) {
   const p = pt.matrixTransform(svg.getScreenCTM().inverse());
   return { x: p.x, y: p.y };
 }
+let ellipseStart = null;
+let lastEllipseRecord = null;
+
 function startDrawing(panel, evt) {
   isDrawing = true;
-  rawPoints = [svgPointFromEvent(panel, evt)];
+  const p0 = svgPointFromEvent(panel, evt);
   const g = PANELS[panel].svg.querySelector('.drawShapesGroup');
-  liveStrokeEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  liveStrokeEl.setAttribute('fill', 'none');
-  liveStrokeEl.setAttribute('stroke', '#e0752f');
-  liveStrokeEl.setAttribute('stroke-width', currentPenWidth);
-  liveStrokeEl.setAttribute('stroke-linecap', 'round');
-  liveStrokeEl.setAttribute('stroke-linejoin', 'round');
+  if (currentTool === 'ellipse') {
+    ellipseStart = p0;
+    liveStrokeEl = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    liveStrokeEl.setAttribute('fill', 'none');
+    liveStrokeEl.setAttribute('stroke', '#e0752f');
+    liveStrokeEl.setAttribute('stroke-width', '2');
+    liveStrokeEl.setAttribute('stroke-dasharray', '4 3');
+    liveStrokeEl.setAttribute('cx', p0.x); liveStrokeEl.setAttribute('cy', p0.y);
+    liveStrokeEl.setAttribute('rx', 0); liveStrokeEl.setAttribute('ry', 0);
+  } else {
+    rawPoints = [p0];
+    liveStrokeEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    liveStrokeEl.setAttribute('fill', 'none');
+    liveStrokeEl.setAttribute('stroke', '#e0752f');
+    liveStrokeEl.setAttribute('stroke-width', '2');
+    liveStrokeEl.setAttribute('stroke-linecap', 'round');
+    liveStrokeEl.setAttribute('stroke-linejoin', 'round');
+  }
   g.appendChild(liveStrokeEl);
 }
 function continueDrawing(panel, evt) {
   if (!isDrawing) return;
-  rawPoints.push(svgPointFromEvent(panel, evt));
-  liveStrokeEl.setAttribute('d', rawPoints.map((p,i) => `${i===0?'M':'L'} ${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '));
+  const p = svgPointFromEvent(panel, evt);
+  if (currentTool === 'ellipse') {
+    const cx = (ellipseStart.x + p.x) / 2, cy = (ellipseStart.y + p.y) / 2;
+    const rx = Math.abs(p.x - ellipseStart.x) / 2, ry = Math.abs(p.y - ellipseStart.y) / 2;
+    liveStrokeEl.setAttribute('cx', cx); liveStrokeEl.setAttribute('cy', cy);
+    liveStrokeEl.setAttribute('rx', rx); liveStrokeEl.setAttribute('ry', ry);
+    lastEllipseRecord = { type:'ellipse', cx, cy, rx: Math.max(rx,4), ry: Math.max(ry,4), bounds: { cx, cy, r: Math.max(rx,ry,4) } };
+  } else {
+    rawPoints.push(p);
+    liveStrokeEl.setAttribute('d', rawPoints.map((pt,i) => `${i===0?'M':'L'} ${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(' '));
+  }
 }
 function activeEntryFromSelection() {
   if (!selectedId) return null;
@@ -1945,22 +1989,32 @@ function onPointerUp() {
   if (!isDrawing) return;
   isDrawing = false;
   if (liveStrokeEl) { liveStrokeEl.remove(); liveStrokeEl = null; }
-  if (rawPoints.length < 3 || !activePanel) { rawPoints = []; return; }
+  if (!activePanel) { rawPoints = []; ellipseStart = null; return; }
   const entry = activeEntryFromSelection();
-  if (!entry) { rawPoints = []; return; }
+  if (!entry) { rawPoints = []; ellipseStart = null; return; }
+
+  let record = null;
+  if (currentTool === 'ellipse' && ellipseStart) {
+    // use the last known drag point via rawPoints fallback is unavailable here; recompute from stored live attrs is gone,
+    // so we track the final point separately during continueDrawing instead (see lastEllipsePoint below)
+    record = lastEllipseRecord;
+  } else if (rawPoints.length >= 3) {
+    record = { type:'pen', path: smoothPathFromPoints(rawPoints), bounds: boundsOf(rawPoints) };
+  }
+  rawPoints = []; ellipseStart = null; lastEllipseRecord = null;
+  if (!record) return;
+
   entry.drawings = entry.drawings || {};
-  const record = { path: smoothPathFromPoints(rawPoints), bounds: boundsOf(rawPoints) };
   if (activePanel === 'axial') record.level = LEVEL_ORDER[currentIdx];
   if (activePanel === 'sagittal') record.side = entry.side;
   entry.drawings[activePanel] = record;
-  rawPoints = [];
   renderDrawnShapes(activePanel);
   renderScoringPanel();
 }
 
 document.querySelectorAll('.pen-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    currentPenWidth = Number(btn.dataset.pen);
+    currentTool = btn.dataset.tool;
     btn.closest('.draw-toolbar, .draw-toolbar-mini').querySelectorAll('.pen-btn').forEach(b => b.classList.toggle('active', b===btn));
   });
 });
@@ -1999,13 +2053,20 @@ function drawShapeRecord(rec, entry, svgEl, g) {
   const color = gradientColorFor(entry);
   const grad = ensureGradient(svgEl, gradId, color);
   grad.setAttribute('cx', rec.bounds.cx); grad.setAttribute('cy', rec.bounds.cy); grad.setAttribute('r', rec.bounds.r * 1.15);
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('d', rec.path);
-  path.setAttribute('fill', `url(#${gradId})`);
-  path.setAttribute('stroke', color);
-  path.setAttribute('stroke-width', '1.2');
-  path.setAttribute('stroke-opacity', '0.7');
-  g.appendChild(path);
+  let shape;
+  if (rec.type === 'ellipse') {
+    shape = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    shape.setAttribute('cx', rec.cx); shape.setAttribute('cy', rec.cy);
+    shape.setAttribute('rx', rec.rx); shape.setAttribute('ry', rec.ry);
+  } else {
+    shape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    shape.setAttribute('d', rec.path);
+  }
+  shape.setAttribute('fill', `url(#${gradId})`);
+  shape.setAttribute('stroke', color);
+  shape.setAttribute('stroke-width', '1.2');
+  shape.setAttribute('stroke-opacity', '0.7');
+  g.appendChild(shape);
 }
 
 // draws directly into the REAL map SVGs (not a separate overlay), so shapes persist regardless
@@ -2230,6 +2291,61 @@ document.getElementById('copyReportBtn').addEventListener('click', () => {
 });
 document.getElementById('printReportBtn').addEventListener('click', () => { buildPrintView(); window.print(); });
 generateReport();
+
+// ============================================================
+// ENLARGED-VIEW MODAL (coronal / sagittal): drawing on the small side panels is fiddly, so
+// clicking the panel title -- or starting to draw on it -- moves the SAME live elements
+// (not a copy) into a big centered modal. Nothing needs re-syncing: it's the identical DOM
+// node, just temporarily relocated, so every existing behaviour keeps working unchanged.
+// ============================================================
+const panelModal = document.getElementById('panelModal');
+const panelModalBody = document.getElementById('panelModalBody');
+const panelModalTitle = document.getElementById('panelModalTitle');
+const PANEL_HOME = {};
+
+function recordHome(panel, holderId, toolbarId) {
+  const wrap = document.getElementById(holderId).closest('.draw-wrap');
+  const toolbar = document.getElementById(toolbarId);
+  PANEL_HOME[panel] = { wrap, toolbar, wrapParent: wrap.parentNode, wrapNext: wrap.nextSibling, toolbarParent: toolbar.parentNode, toolbarNext: toolbar.nextSibling };
+}
+recordHome('coronal', 'coronalHolder', 'drawToolbarCoronal');
+recordHome('sagittal', 'sagittalHolder', 'drawToolbarSagittal');
+
+let modalOpenPanel = null;
+function openPanelModal(panel) {
+  if (panel !== 'coronal' && panel !== 'sagittal') return;
+  if (modalOpenPanel && modalOpenPanel !== panel) closePanelModal();
+  const H = PANEL_HOME[panel];
+  panelModalTitle.textContent = panel === 'coronal' ? 'Coronale' : 'Sagittale';
+  panelModalBody.appendChild(H.wrap);
+  panelModalBody.appendChild(H.toolbar);
+  panelModal.classList.add('open');
+  modalOpenPanel = panel;
+}
+function closePanelModal() {
+  if (!modalOpenPanel) return;
+  const H = PANEL_HOME[modalOpenPanel];
+  H.wrapParent.insertBefore(H.wrap, H.wrapNext);
+  H.toolbarParent.insertBefore(H.toolbar, H.toolbarNext);
+  panelModal.classList.remove('open');
+  if (activePanel === modalOpenPanel) deactivateDrawMode(modalOpenPanel);
+  modalOpenPanel = null;
+}
+document.querySelectorAll('[data-openpanel]').forEach(el => {
+  el.addEventListener('click', () => openPanelModal(el.dataset.openpanel));
+});
+document.getElementById('panelModalClose').addEventListener('click', closePanelModal);
+document.getElementById('panelModalBackdrop').addEventListener('click', closePanelModal);
+
+// starting to draw on coronal/sagittal auto-opens the enlarged view; finishing closes it again
+const _origActivateDrawMode = activateDrawMode;
+activateDrawMode = function(panel) {
+  if (panel === 'coronal' || panel === 'sagittal') openPanelModal(panel);
+  _origActivateDrawMode(panel);
+};
+document.querySelectorAll('[data-done="coronal"], [data-done="sagittal"]').forEach(btn => {
+  btn.addEventListener('click', () => closePanelModal());
+});
 
 // ============================================================
 // PRINT VIEW: text-left, maps-stacked-right column; faint-fade (not gray) for non-lit sectors
