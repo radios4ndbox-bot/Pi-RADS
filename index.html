@@ -2236,7 +2236,18 @@ function buildPrintView() {
       }
     });
   }
-  function cloneFaded(svgSelector, idTest, isSagittal) {
+  function mergeAnnotations(cloneSvgEl, panel) {
+    const P = PANELS[panel];
+    if (!P || !P.svg) return;
+    const shapesGroup = P.svg.querySelector('.drawShapesGroup');
+    const defsEl = P.svg.querySelector('defs');
+    if (shapesGroup && shapesGroup.children.length) {
+      if (defsEl && defsEl.children.length) cloneSvgEl.appendChild(defsEl.cloneNode(true));
+      cloneSvgEl.appendChild(shapesGroup.cloneNode(true));
+    }
+  }
+
+  function cloneFaded(svgSelector, idTest, isSagittal, panel) {
     const svgEl = document.querySelector(svgSelector);
     if (!svgEl) return '';
     const clone = svgEl.cloneNode(true);
@@ -2246,14 +2257,21 @@ function buildPrintView() {
       });
     }
     forcePrintDecorative(clone, isSagittal);
+    mergeAnnotations(clone, panel);
     return clone.outerHTML;
   }
 
   const activeLevel = LEVEL_ORDER[currentIdx];
-  const axialSvg = document.querySelector(`#discLayers .disc-layer[data-level="${activeLevel}"] svg`);
-  const coronalHtml = cloneFaded('#coronalHolder svg', id => SECTOR_ID_RE.coronal.test(id), false);
+  const axialSvgSource = document.querySelector(`#discLayers .disc-layer[data-level="${activeLevel}"] svg`);
+  let axialSvg = null;
+  if (axialSvgSource) {
+    const axialClone = axialSvgSource.cloneNode(true);
+    mergeAnnotations(axialClone, 'axial');
+    axialSvg = axialClone;
+  }
+  const coronalHtml = cloneFaded('#coronalHolder svg', id => SECTOR_ID_RE.coronal.test(id), false, 'coronal');
   const activeSide = document.querySelector('#sagittalHolder .sag-layer.active');
-  const sagittalHtml = activeSide ? cloneFaded(`#sagittalHolder .sag-layer[data-side="${activeSide.dataset.side}"] svg`, id => SECTOR_ID_RE.sagittal.test(id), true) : '';
+  const sagittalHtml = activeSide ? cloneFaded(`#sagittalHolder .sag-layer[data-side="${activeSide.dataset.side}"] svg`, id => SECTOR_ID_RE.sagittal.test(id), true, 'sagittal') : '';
 
   let tableHtml = '';
   if (rows.length) {
