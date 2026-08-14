@@ -8,16 +8,13 @@
     background: var(--bg); color: var(--text); padding: 22px; min-height: 100vh;
   }
   #root .wrap { max-width: 1320px; margin: 0 auto; }
-  #root header { border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:10px;}
-  #root .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; }
-  #root h1 { font-size: 19px; margin: 0; color: #10202f; font-weight: 700; }
-  #root .sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
-  #root h2 { font-size: 13px; margin: 0 0 10px 0; color: #10202f; font-weight:700; }
+  #root header { border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;}
   #root .brand { display:flex; align-items:center; gap:14px; }
   #root .brand-icon { height:44px; width:auto; flex-shrink:0; }
   #root .brand-text h1 { font-size:20px; margin:0; color:#10202f; font-weight:700; letter-spacing:-.01em; }
   #root .brand-x { color:var(--accent); font-weight:400; }
-  #root .brand-text .sub { margin-top:2px; }
+  #root .sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+  #root h2 { font-size: 13px; margin: 0 0 10px 0; color: #10202f; font-weight:700; }
 
   #root .mode-toggle { display:flex; gap:6px; }
   #root .mode-btn { font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:7px 14px; border-radius:6px; border:1px solid var(--accent-dim); background:#fff; color:var(--text-dim); cursor:pointer; }
@@ -30,36 +27,32 @@
   #root .disc-layer { position:absolute; inset:14px; opacity:0; transition:opacity .25s ease; pointer-events:none; display:flex; align-items:center; justify-content:center; }
   #root .disc-layer.active { opacity:1; pointer-events:auto; }
   #root .disc-layer svg { width:100%; height:100%; max-height:440px; }
-  #root .stage-controls { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:20px; padding:5px 12px; box-shadow:0 1px 4px rgba(30,60,90,.1); }
+  #root .stage-controls { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:20px; padding:5px 12px; box-shadow:0 1px 4px rgba(30,60,90,.1); z-index:2; }
   #root .stage-btn { width:24px; height:24px; border-radius:50%; border:1px solid var(--accent-dim); background:#f3f8fc; color:var(--accent); cursor:pointer; font-size:12px; }
   #root .stage-label { font-family:'IBM Plex Mono',monospace; font-size:10.5px; min-width:80px; text-align:center; }
 
   #root .side-panel { background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px; box-shadow:0 1px 3px rgba(30,60,90,.06); }
   #root .side-panel h3 { font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-dim); margin:0 0 8px 0; text-align:center; display:flex; justify-content:center; align-items:center; gap:6px;}
-  #root .svg-holder { position:relative; min-height:230px; }
-  #root #sagittalHolder { aspect-ratio: 417 / 618; min-height: unset; }
-  #root #coronalHolder { aspect-ratio: 678 / 900; }
+  #root .side-tag { font-family:'IBM Plex Mono',monospace; font-size:9.5px; padding:1px 6px; border-radius:3px; border:1px solid var(--accent-dim); color:var(--accent); background:#eaf4fc; }
+  #root .draw-wrap { position:relative; }
   #root .svg-holder svg { width:100%; height:auto; display:block; }
-  #root .sag-layer svg { height:100%; }
+  #root #sagittalHolder { aspect-ratio: 417 / 618; position:relative; }
+  #root #coronalHolder { aspect-ratio: 678 / 900; position:relative; }
   #root .sag-layer { position:absolute; inset:0; opacity:0; transition:opacity .2s ease; pointer-events:none; }
   #root .sag-layer.active { opacity:1; pointer-events:auto; }
-  #root .side-tag { font-family:'IBM Plex Mono',monospace; font-size:9.5px; padding:1px 6px; border-radius:3px; border:1px solid var(--accent-dim); color:var(--accent); background:#eaf4fc; }
 
   #root .sector-dimmed { filter: grayscale(1) brightness(1.05) !important; }
 
-  #root .draw-overlay-holder { position:absolute; inset:14px; display:none; z-index:5; }
+  #root .draw-overlay-holder { position:absolute; inset:0; display:none; z-index:5; }
+  #root .stage .draw-overlay-holder { inset:14px; }
   #root .draw-overlay-holder.active { display:block; }
   #root .draw-overlay-holder svg { width:100%; height:100%; cursor:crosshair; touch-action:none; }
   #root .draw-toolbar { position:absolute; top:10px; left:50%; transform:translateX(-50%); display:none; align-items:center; gap:6px; background:#fff; border:1px solid var(--line); border-radius:20px; padding:6px 10px; box-shadow:0 1px 4px rgba(30,60,90,.12); z-index:6; }
   #root .draw-toolbar.active { display:flex; }
-  #root .draw-tb-label { font-size:10.5px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; }
   #root .pen-btn { font-size:10.5px; padding:5px 9px; border-radius:12px; border:1px solid var(--line); background:var(--panel-2); color:var(--text-dim); cursor:pointer; }
   #root .pen-btn.active { border-color:var(--accent); color:var(--accent); background:#eaf4fc; font-weight:600; }
   #root .draw-tb-btn { font-size:10.5px; padding:5px 10px; border-radius:12px; border:1px solid var(--line); background:#fff; color:var(--text-dim); cursor:pointer; }
   #root .draw-tb-btn.primary-tb { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600; }
-
-  #root .draw-wrap { position:relative; }
-  #root .draw-wrap .draw-overlay-holder { inset:0; }
   #root .draw-toolbar-mini { display:none; flex-wrap:wrap; gap:5px; margin-top:8px; justify-content:center; }
   #root .draw-toolbar-mini.active { display:flex; }
 
@@ -70,7 +63,7 @@
   #root .meta-field { margin-bottom:10px; }
   #root .meta-field.row { display:flex; gap:8px; }
   #root .meta-field label { display:block; font-size:10.5px; color:var(--text-dim); margin-bottom:4px; font-weight:500; }
-  #root .meta-field input, #root .meta-field select { width:100%; background:#fff; color:var(--text); border:1px solid var(--line); border-radius:4px; padding:6px 7px; font-size:12px; }
+  #root .meta-field input, #root .meta-field select, #root .meta-field textarea { width:100%; background:#fff; color:var(--text); border:1px solid var(--line); border-radius:4px; padding:6px 7px; font-size:12px; font-family:inherit; }
   #root .readout-value { font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--accent); font-weight:600; }
   #root .zone-toggle { display:flex; gap:5px; margin-bottom:6px; }
   #root .zone-toggle button { flex:1; padding:5px; font-size:10.5px; border-radius:4px; border:1px solid var(--line); background:var(--panel-2); color:var(--text-dim); cursor:pointer; }
@@ -96,11 +89,9 @@
   #root .lesion-list { margin-top:12px; padding-top:10px; border-top:1px solid var(--line); }
   #root .lesion-item { display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:6px 8px; border-radius:4px; margin-bottom:4px; background:var(--panel-2); cursor:pointer; }
   #root .lesion-item.editing { outline:2px solid var(--accent); }
-  #root .lesion-cat-chip { font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:10.5px; width:19px; height:19px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0; }
+  #root .lesion-cat-chip { font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:10.5px; min-width:19px; height:19px; padding:0 4px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0; }
   #root .lesion-remove { color:#b5495a; font-size:13px; padding:2px 5px; }
-  #root .index-tag { font-size:8.5px; color:#fff; background:#e8a355; border-radius:3px; padding:1px 5px; margin-left:5px; }
 
-  /* creative mode */
   #root .criteria-list { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
   #root .criteria-item { display:flex; gap:8px; align-items:flex-start; padding:7px 9px; border:1px solid var(--line); border-radius:5px; cursor:pointer; font-size:11.5px; }
   #root .criteria-item:hover { border-color:var(--accent-dim); background:#f9fcff; }
@@ -109,7 +100,7 @@
   #root .criteria-num { font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--accent); flex-shrink:0; width:14px; }
   #root .range-bar-wrap { margin: 16px 0 6px 0; }
   #root .range-track { position:relative; height:8px; background:var(--panel-2); border-radius:4px; border:1px solid var(--line); }
-  #root .range-fill { position:absolute; top:-1px; bottom:-1px; border-radius:4px; background:linear-gradient(90deg,#8fbf5a,#e0752f); transition: all .2s ease; }
+  #root .range-fill { position:absolute; top:-1px; bottom:-1px; border-radius:4px; background:linear-gradient(90deg,#8fbf5a,#e0752f); }
   #root .range-ticks { display:flex; justify-content:space-between; margin-top:6px; }
   #root .range-ticks span { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-dim); width:20px; text-align:center; }
   #root .range-ticks span.in-range { color:var(--accent); font-weight:700; }
@@ -118,7 +109,7 @@
   #root .creative-note { font-size:10.5px; color:var(--text-dim); background:var(--panel-2); border-radius:5px; padding:8px 10px; margin-top:12px; line-height:1.5; }
 
   #root .report-section { margin-top:14px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:14px; box-shadow:0 1px 3px rgba(30,60,90,.06); }
-  #root .report-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  #root .report-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px; }
   #root .report-textarea { width:100%; min-height:280px; background:#fbfdff; border:1px solid var(--line); border-radius:6px; padding:12px; font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.6; resize:vertical; }
 
   #root .print-area { display:none; }
@@ -140,16 +131,17 @@
   }
 </style>
 <script>
-const LEVEL_NAMES = {"base": "Base", "mid": "Corpo medio", "apex": "Apice"};
-const LEVEL_ORDER = ["apex", "mid", "base"];
-const ZONE_NAMES = {"AFS": "Stroma fibromuscolare anteriore", "TZa": "Transition zone, anteriore", "TZp": "Transition zone, posteriore", "PZa": "Peripheral zone, anteriore", "PZpl": "Peripheral zone, posterolaterale", "PZpm": "Peripheral zone, posteromediale", "CZ": "Zona centrale"};
-const MACRO = {"AFS": "AFS", "TZa": "TZ", "TZp": "TZ", "PZa": "PZ", "PZpl": "PZ", "PZpm": "PZ", "CZ": "CZ"};
-const PZ_OPTIONS = [[1, "Nessuna anomalia su ADC e su DWI ad alto b-value"], [2, "Area lineare/a cuneo, lieve ipointensita ADC e/o iperintensita DWI"], [3, "Focale, ipointensita ADC e/o iperintensita DWI (non entrambe marcate)"], [4, "Focale, marcata ipointensita ADC E marcata iperintensita DWI, <1,5cm"], [5, "Come 4 ma \u22651,5cm, oppure segni di estensione extraprostatica"]];
-const TZ_OPTIONS = [[1, "TZ normale, o nodulo rotondo completamente incapsulato"], [2, "Nodulo per lo piu incapsulato/omogeneo, o area ipointensa omogenea tra noduli"], [3, "Segnale eterogeneo, margini obliterati/mal definiti"], [4, "Lenticolare/non circoscritta, omogenea, moderatamente ipointensa, <1,5cm"], [5, "Come 4 ma \u22651,5cm, oppure segni di estensione extraprostatica"]];
-const CATEGORY_COLORS = {"1": "#3fae6a", "2": "#8fbf5a", "3": "#d99a26", "4": "#e0752f", "5": "#c73e3e"};
-
 const root = document.getElementById('root');
 root.innerHTML = `
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <filter id="glowOnly" x="-80%" y="-80%" width="260%" height="260%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur1"/>
+        <feFlood flood-color="#ff3b3b" flood-opacity="0.95" result="color1"/>
+        <feComposite in="color1" in2="blur1" operator="in" result="glow1"/>
+      </filter>
+    </defs>
+  </svg>
   <div class="wrap">
     <header>
       <div class="brand">
@@ -168,14 +160,13 @@ root.innerHTML = `
     <div class="central-zone">
       <div class="stage" id="stage">
         <div id="discLayers"></div>
-        <div id="drawOverlayHolder" class="draw-overlay-holder"></div>
-        <div class="draw-toolbar" id="drawToolbar">
-          <span class="draw-tb-label">Penna:</span>
-          <button class="pen-btn active" data-pen="2">sottile</button>
-          <button class="pen-btn" data-pen="4">media</button>
-          <button class="pen-btn" data-pen="7">spessa</button>
-          <button class="draw-tb-btn" id="clearDrawBtn">Cancella</button>
-          <button class="draw-tb-btn primary-tb" id="doneDrawBtn">Fine disegno</button>
+        <div id="drawOverlayHolderAxial" class="draw-overlay-holder"></div>
+        <div class="draw-toolbar" id="drawToolbarAxial">
+          <button class="pen-btn active" data-pen="2" data-panel="axial">sottile</button>
+          <button class="pen-btn" data-pen="4" data-panel="axial">media</button>
+          <button class="pen-btn" data-pen="7" data-panel="axial">spessa</button>
+          <button class="draw-tb-btn" data-clear="axial">Cancella</button>
+          <button class="draw-tb-btn primary-tb" data-done="axial">Fine disegno</button>
         </div>
         <div class="stage-controls">
           <button class="stage-btn" id="prevBtn">&#8593;</button>
@@ -183,6 +174,7 @@ root.innerHTML = `
           <button class="stage-btn" id="nextBtn">&#8595;</button>
         </div>
       </div>
+
       <div class="side-panel">
         <h3>Coronale</h3>
         <div class="draw-wrap">
@@ -197,6 +189,7 @@ root.innerHTML = `
           <button class="draw-tb-btn primary-tb" data-done="coronal">Fine</button>
         </div>
       </div>
+
       <div class="side-panel">
         <h3>Sagittale <span class="side-tag" id="sagSideTag">R</span></h3>
         <div class="draw-wrap">
@@ -241,7 +234,7 @@ root.innerHTML = `
             <div><label>Medico refertante</label><input type="text" id="metaPhysician"></div>
             <div><label>T.S.R.M.</label><input type="text" id="metaTsrm"></div>
           </div>
-          <div class="meta-field"><label>Tecnica (modificabile)</label><textarea class="wide" id="metaTecnica" rows="5" style="font-size:11px;line-height:1.4;width:100%;border:1px solid var(--line);border-radius:4px;padding:6px;"></textarea></div>
+          <div class="meta-field"><label>Tecnica (modificabile)</label><textarea id="metaTecnica" rows="5" style="font-size:11px;line-height:1.4;"></textarea></div>
         </div>
 
         <div class="meta-panel" id="examFindingsPanel">
@@ -267,7 +260,7 @@ root.innerHTML = `
         </div>
       </div>
     </div>
-    <div id="printArea" class="print-area" style="display:none"></div>
+    <div id="printArea" class="print-area"></div>
   </div>
 `;
 
@@ -1310,9 +1303,38 @@ document.getElementById('coronalHolder').innerHTML = `<svg viewBox="0 0 678 900"
   holder.appendChild(layerL);
 }
 
-document.querySelectorAll('#root .disc-layer text, #root .svg-holder text').forEach(t => { t.style.pointerEvents = 'none'; });
+// ============================================================
+// CONSTANTS
+// ============================================================
+const LEVEL_ORDER = ['apex','mid','base'];
+const LEVEL_NAMES = {base:'Base', mid:'Corpo medio', apex:'Apice'};
+const ZONE_NAMES = {
+  AFS:'Stroma fibromuscolare anteriore', TZa:'Transition zone, anteriore', TZp:'Transition zone, posteriore',
+  PZa:'Peripheral zone, anteriore', PZpl:'Peripheral zone, posterolaterale', PZpm:'Peripheral zone, posteromediale',
+  CZ:'Zona centrale',
+};
+const MACRO = {AFS:'AFS', TZa:'TZ', TZp:'TZ', PZa:'PZ', PZpl:'PZ', PZpm:'PZ', CZ:'CZ'};
+const PZ_OPTIONS = [
+  [1,"Nessuna anomalia su ADC e su DWI ad alto b-value"],
+  [2,"Area lineare/a cuneo, lieve ipointensita ADC e/o iperintensita DWI"],
+  [3,"Focale, ipointensita ADC e/o iperintensita DWI (non entrambe marcate)"],
+  [4,"Focale, marcata ipointensita ADC E marcata iperintensita DWI, <1,5cm"],
+  [5,"Come 4 ma >=1,5cm, oppure segni di estensione extraprostatica"],
+];
+const TZ_OPTIONS = [
+  [1,"TZ normale, o nodulo rotondo completamente incapsulato"],
+  [2,"Nodulo per lo piu incapsulato/omogeneo, o area ipointensa omogenea tra noduli"],
+  [3,"Segnale eterogeneo, margini obliterati/mal definiti"],
+  [4,"Lenticolare/non circoscritta, omogenea, moderatamente ipointensa, <1,5cm"],
+  [5,"Come 4 ma >=1,5cm, oppure segni di estensione extraprostatica"],
+];
+const CATEGORY_COLORS = {1:'#3fae6a', 2:'#8fbf5a', 3:'#d99a26', 4:'#e0752f', 5:'#c73e3e'};
+const OFFICIAL_AXIAL_COLORS = { AFS:'#8fd0d9', TZa:'#f2d06b', TZp:'#f2d06b', PZa:'#f2b9cf', PZpl:'#f2b9cf', PZpm:'#f2b9cf', CZ:'#a9d9b3' };
+const ZONE_MACRO_COLORS = { AFS:'#8fd0d9', TZ:'#f2d06b', PZ:'#f2b9cf', CZ:'#a9d9b3' };
 
-// ============ single source of truth for sector/SV id patterns (was duplicated 7x before - consolidated here) ============
+// single source of truth for id patterns -- the _p<n> multi-piece suffix can appear either
+// right before or right after the R/L marker depending on how the piece was authored, so every
+// pattern below tolerates both orders. (root cause of several bugs in the earlier iteration)
 const SECTOR_ID_RE = {
   coronal:  /^coronal_(base|mid|apex)_(CZ|TZ|PZ)(?:_p\d+)?_(R|L)(?:_p\d+)?$/,
   sagittal: /^sagittal_(base|mid|apex)_(AFS|CZ|TZ|PZ)(?:_p\d+)?_(R|L)(?:_p\d+)?$/,
@@ -1321,19 +1343,29 @@ const SV_ID_RE = {
   coronal:  /^coronal_SV_(R|L)$/,
   sagittal: /^sagittal_SV(?:_p\d+)?_(R|L)(?:_p\d+)?$/,
 };
+const AXIAL_SECTOR_RE = /^(base|mid|apex)_(AFS|TZa|TZp|PZa|PZpl|PZpm|CZ)_(R|L)$/;
+
+function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+// ============================================================
+// INITIAL COLOR / VISIBILITY PASS
+// ============================================================
+document.querySelectorAll('#root .disc-layer text, #root .svg-holder text').forEach(t => { t.style.pointerEvents = 'none'; });
 
 function isNearWhite(el) {
   const style = el.getAttribute('style') || '';
   const m = style.match(/fill:\s*#([0-9a-fA-F]{6})/);
   if (!m) return false;
-  const hex = m[1];
-  const r = parseInt(hex.slice(0,2),16), g = parseInt(hex.slice(2,4),16), b = parseInt(hex.slice(4,6),16);
+  const r = parseInt(m[1].slice(0,2),16), g = parseInt(m[1].slice(2,4),16), b = parseInt(m[1].slice(4,6),16);
   return r > 230 && g > 230 && b > 230;
 }
 function isUnresolvedGradient(el) {
-  const style = el.getAttribute('style') || '';
-  return /fill:\s*url\(/.test(style);
+  return /fill:\s*url\(/.test(el.getAttribute('style') || '');
 }
+
+// decorative shapes (seminal vesicle outline/detail, urethra, etc.) that are near-white or have a
+// broken gradient reference: force them to clean white. We never reorder z-index here -- moving
+// elements around caused real bugs before (covering up neighboring pieces).
 document.querySelectorAll('#sagittalHolder path').forEach(el => {
   const id = el.id || '';
   const isSector = SECTOR_ID_RE.sagittal.test(id) || SV_ID_RE.sagittal.test(id);
@@ -1344,14 +1376,11 @@ document.querySelectorAll('#sagittalHolder path').forEach(el => {
   }
 });
 
-const OFFICIAL_COLORS = {
-  AFS: '#8fd0d9', TZa: '#f2d06b', TZp: '#f2d06b',
-  PZa: '#f2b9cf', PZpl: '#f2b9cf', PZpm: '#f2b9cf', CZ: '#a9d9b3',
-};
+// axial: force the official PI-RADS palette on every sector
 document.querySelectorAll('#root .disc-layer [id]').forEach(el => {
-  const m = el.id.match(/^(base|mid|apex)_(AFS|TZa|TZp|PZa|PZpl|PZpm|CZ)_(R|L)$/);
+  const m = el.id.match(AXIAL_SECTOR_RE);
   if (!m) return;
-  const color = OFFICIAL_COLORS[m[2]];
+  const color = OFFICIAL_AXIAL_COLORS[m[2]];
   if (color) {
     el.style.setProperty('fill', color, 'important');
     el.style.setProperty('stroke', '#1c1a17', 'important');
@@ -1361,16 +1390,14 @@ document.querySelectorAll('#root .disc-layer [id]').forEach(el => {
   }
 });
 
-// ============ zone colors (id patterns already declared above) ============
-const ZONE_MACRO_COLORS = { AFS: '#8fd0d9', TZ: '#f2d06b', PZ: '#f2b9cf', CZ: '#a9d9b3' };
-
-function forceZoneColor(container, idPattern, colorMap) {
+// coronal/sagittal: only fix pieces with a genuinely broken fill (leftover gradient reference
+// from the original vectorization) -- never touch pieces with a valid authored color, even if
+// it's an intentional tint variation (e.g. the TZ/PZ transparency-overlap shading).
+function forceZoneColorIfBroken(container, idPattern, colorMap) {
   container.querySelectorAll('[id]').forEach(el => {
     const m = el.id.match(idPattern);
     if (!m) return;
-    const style = el.getAttribute('style') || '';
-    const isBroken = /fill:\s*url\(/.test(style); // only fix genuinely broken gradient-reference fills
-    if (!isBroken) return; // leave valid authored colors (incl. intentional tan/orange overlap tint) untouched
+    if (!isUnresolvedGradient(el)) return;
     const color = colorMap[m[2]];
     if (color) {
       el.style.setProperty('fill', color, 'important');
@@ -1379,8 +1406,8 @@ function forceZoneColor(container, idPattern, colorMap) {
     }
   });
 }
-forceZoneColor(document.getElementById('coronalHolder'), SECTOR_ID_RE.coronal, ZONE_MACRO_COLORS);
-forceZoneColor(document.getElementById('sagittalHolder'), SECTOR_ID_RE.sagittal, ZONE_MACRO_COLORS);
+forceZoneColorIfBroken(document.getElementById('coronalHolder'), SECTOR_ID_RE.coronal, ZONE_MACRO_COLORS);
+forceZoneColorIfBroken(document.getElementById('sagittalHolder'), SECTOR_ID_RE.sagittal, ZONE_MACRO_COLORS);
 
 function forceSvColor(container, svPattern) {
   container.querySelectorAll('[id]').forEach(el => {
@@ -1393,24 +1420,17 @@ function forceSvColor(container, svPattern) {
 forceSvColor(document.getElementById('coronalHolder'), SV_ID_RE.coronal);
 forceSvColor(document.getElementById('sagittalHolder'), SV_ID_RE.sagittal);
 
+// ============================================================
+// STATE
+// ============================================================
 let currentIdx = 0;
 let selectedId = null;
 let currentMode = 'normal'; // 'normal' | 'creative'
 const sagSideTag = document.getElementById('sagSideTag');
 
-// drawing-tool state (declared early: setLevel() below needs to call rebuildDrawSvg on level change)
-const drawOverlayHolder = document.getElementById('drawOverlayHolder');
-const drawToolbar = document.getElementById('drawToolbar');
-let drawSvg = null;
-let drawGradientsDefs = null;
-let currentPenWidth = 2;
-let isDrawing = false;
-let rawPoints = [];
-let liveStrokeEl = null;
-
 function sectorsForLevel(level) {
   return Array.from(document.querySelectorAll(`#root .disc-layer[data-level="${level}"] [id]`))
-    .filter(el => el.id.match(/^(base|mid|apex)_(AFS|TZa|TZp|PZa|PZpl|PZpm|CZ)_(R|L)$/));
+    .filter(el => AXIAL_SECTOR_RE.test(el.id));
 }
 function setSagittalSide(side) {
   document.querySelectorAll('#sagittalHolder .sag-layer').forEach(l => l.classList.toggle('active', l.dataset.side === side));
@@ -1418,23 +1438,26 @@ function setSagittalSide(side) {
   if (typeof renderDrawnShapes === 'function') renderDrawnShapes('sagittal');
 }
 
-// ---------- gray-only duplicate system (no glow: selected zone just keeps its real color) ----------
+// ============================================================
+// GRAY-DUPLICATE DIMMING (coronal/sagittal): the selected zone keeps its real, untouched color;
+// everything else gets a gray twin drawn on top. The original artwork is never modified.
+// ============================================================
 const grayDuplicates = new Map();
 function buildGrayDuplicate(el) {
   const gray = el.cloneNode(false);
   gray.removeAttribute('id');
   gray.removeAttribute('filter');
   gray.setAttribute('style', 'fill:#a9b2ba;fill-opacity:1;stroke:#7c848c;stroke-width:1.2;opacity:0;pointer-events:none;transition:opacity .15s ease;');
-  el.parentNode.appendChild(gray);
+  el.parentNode.appendChild(gray); // append only the duplicate -- never move the original
   grayDuplicates.set(el, gray);
 }
-function registerGrayDuplicates(container, sectorPattern) {
-  container.querySelectorAll('[id]').forEach(el => { if (sectorPattern.test(el.id)) buildGrayDuplicate(el); });
+function registerGrayDuplicates(container, pattern) {
+  container.querySelectorAll('[id]').forEach(el => { if (pattern.test(el.id)) buildGrayDuplicate(el); });
 }
 registerGrayDuplicates(document.getElementById('coronalHolder'), SECTOR_ID_RE.coronal);
 registerGrayDuplicates(document.getElementById('sagittalHolder'), SECTOR_ID_RE.sagittal);
 
-// ---------- seminal vesicle: subtle blue duplicate, triggered only by the exam toggle ----------
+// seminal vesicles: separate subtle-blue duplicate, only triggered by the exam-level toggle
 const svBlueDuplicates = new Map();
 function buildSvBlueDuplicate(el) {
   const blue = el.cloneNode(false);
@@ -1443,8 +1466,8 @@ function buildSvBlueDuplicate(el) {
   el.parentNode.appendChild(blue);
   svBlueDuplicates.set(el, blue);
 }
-function registerSvDuplicates(container, svPattern) {
-  container.querySelectorAll('[id]').forEach(el => { if (svPattern.test(el.id)) buildSvBlueDuplicate(el); });
+function registerSvDuplicates(container, pattern) {
+  container.querySelectorAll('[id]').forEach(el => { if (pattern.test(el.id)) buildSvBlueDuplicate(el); });
 }
 registerSvDuplicates(document.getElementById('coronalHolder'), SV_ID_RE.coronal);
 registerSvDuplicates(document.getElementById('sagittalHolder'), SV_ID_RE.sagittal);
@@ -1452,8 +1475,7 @@ registerSvDuplicates(document.getElementById('sagittalHolder'), SV_ID_RE.sagitta
 function resolveZonePieces(container, zoneId) {
   const m = zoneId.match(/^(.+)_(R|L)$/);
   if (!m) return [];
-  const prefix = m[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const side = m[2];
+  const prefix = escapeRe(m[1]), side = m[2];
   const re = new RegExp(`^${prefix}(?:_p\\d+)?_${side}(?:_p\\d+)?$`);
   return Array.from(container.querySelectorAll('[id]')).filter(el => re.test(el.id));
 }
@@ -1483,14 +1505,34 @@ function setSvHighlight(side) {
   // side: 'destra' | 'sinistra' | 'bilaterale' | null
   svBlueDuplicates.forEach(dup => dup.style.setProperty('opacity', '0', 'important'));
   if (!side) return;
-  const wantSide = { destra: 'R', sinistra: 'L', bilaterale: null }[side]; // null = both
+  const wantSide = { destra:'R', sinistra:'L', bilaterale:null }[side];
   svBlueDuplicates.forEach((dup, el) => {
     const elSide = el.id.match(/_(R|L)(?:_p\d+)?$/)?.[1];
     if (wantSide === null || elSide === wantSide) dup.style.setProperty('opacity', '1', 'important');
   });
 }
 
-// ============ lesion data store ============
+// ============================================================
+// DRAWING-TOOL STATE (declared early: setLevel() below needs to call into it)
+// ============================================================
+let activePanel = null;
+let currentPenWidth = 2;
+let isDrawing = false;
+let rawPoints = [];
+let liveStrokeEl = null;
+const PANELS = {
+  axial:    { holder: document.getElementById('drawOverlayHolderAxial'), svg:null, defs:null,
+              getViewBox: () => { const level = LEVEL_ORDER[currentIdx]; const svgEl = document.querySelector(`#discLayers .disc-layer[data-level="${level}"] svg`); return svgEl ? svgEl.getAttribute('viewBox') : '0 0 500 500'; } },
+  coronal:  { holder: document.getElementById('drawOverlayHolderCoronal'), svg:null, defs:null,
+              getViewBox: () => { const svgEl = document.querySelector('#coronalHolder svg'); return svgEl ? svgEl.getAttribute('viewBox') : '0 0 678 900'; } },
+  sagittal: { holder: document.getElementById('drawOverlayHolderSagittal'), svg:null, defs:null,
+              getViewBox: () => { const svgEl = document.querySelector('#sagittalHolder .sag-layer.active svg'); return svgEl ? svgEl.getAttribute('viewBox') : '0 0 417 618'; } },
+};
+
+
+// ============================================================
+// LESION DATA
+// ============================================================
 const lesions = {}; // sectorId -> array of entries
 let lesionCounter = 1;
 let editingLesionId = null;
@@ -1501,11 +1543,8 @@ function allLesionsFlat() {
   Object.values(lesions).forEach(arr => arr.forEach(e => out.push(e)));
   return out;
 }
-function entryScore(e) {
-  return e.mode === 'creative' ? e.rangeMax : e.category;
-}
+function entryScore(e) { return e.mode === 'creative' ? e.rangeMax : e.category; }
 
-// ============ normal-mode calculation ============
 function computeCategory(entry) {
   if (entry.group === 'PZ') {
     const d = entry.dwi;
@@ -1524,10 +1563,21 @@ function computeCategory(entry) {
 }
 function renderOptions(selectEl, options, current) {
   selectEl.innerHTML = '<option value="">-- seleziona categoria --</option>' +
-    options.map(([n, desc]) => `<option value="${n}" ${current==n?'selected':''}>${n} \u2014 ${desc.slice(0,36)}${desc.length>36?'...':''}</option>`).join('');
+    options.map(([n,desc]) => `<option value="${n}" ${current==n?'selected':''}>${n} \u2014 ${desc.slice(0,36)}${desc.length>36?'...':''}</option>`).join('');
+}
+function getActiveEntry(level, zone, side, group) {
+  const sectorLesions = lesions[selectedId] || [];
+  if (editingLesionId) return sectorLesions.find(e => e.lesionId === editingLesionId);
+  if (!draft || draft.sectorId !== selectedId || draft.mode !== currentMode) {
+    draft = { sectorId: selectedId, zone, level, side, group, mode: currentMode };
+  }
+  draft.group = group;
+  return draft;
 }
 
-// ============ scoring panel rendering ============
+// ============================================================
+// SCORING PANEL
+// ============================================================
 const scoringPanel = document.getElementById('scoringPanel');
 
 function renderScoringPanel() {
@@ -1535,12 +1585,12 @@ function renderScoringPanel() {
     scoringPanel.innerHTML = '<div class="placeholder-msg">Clicca un settore sulla mappa assiale per iniziare lo scoring.</div>';
     return;
   }
-  const m = selectedId.match(/^(base|mid|apex)_(AFS|TZa|TZp|PZa|PZpl|PZpm|CZ)_(R|L)$/);
+  const m = selectedId.match(AXIAL_SECTOR_RE);
   const [, level, zone, side] = m;
   const group = MACRO[zone];
   const sectorLesions = lesions[selectedId] || [];
 
-  let html = `<div class="sel-head">${zone} &mdash; ${LEVEL_NAMES[level]}, ${side === 'R' ? 'destro' : 'sinistro'}</div>
+  let html = `<div class="sel-head">${zone} &mdash; ${LEVEL_NAMES[level]}, ${side==='R'?'destro':'sinistro'}</div>
               <div class="sel-sub">${ZONE_NAMES[zone]}</div>`;
 
   if (sectorLesions.length > 0) {
@@ -1556,34 +1606,18 @@ function renderScoringPanel() {
     html += `</div><button class="link-add" id="newLesionBtn">+ Nuova lesione in questo settore</button>`;
   }
 
-  if (currentMode === 'normal') {
-    html += renderNormalForm(group, side, level, zone);
-  } else {
-    html += renderCreativeForm(group, side, level, zone);
-  }
+  html += currentMode === 'normal' ? renderNormalForm(group, side, level, zone) : renderCreativeForm(group, side, level, zone);
 
   scoringPanel.innerHTML = html;
-  wireCommonHandlers(level, zone, side, group);
-  if (currentMode === 'normal') wireNormalForm(group);
-  else wireCreativeForm(group);
+  wireCommonHandlers();
+  if (currentMode === 'normal') wireNormalForm(group); else wireCreativeForm(group);
 }
 
-function getActiveEntry(level, zone, side, group) {
-  const sectorLesions = lesions[selectedId] || [];
-  if (editingLesionId) return sectorLesions.find(e => e.lesionId === editingLesionId);
-  if (!draft || draft.sectorId !== selectedId || draft.mode !== currentMode) {
-    draft = { sectorId: selectedId, zone, level, side, group, mode: currentMode };
-  }
-  draft.group = group;
-  return draft;
-}
-
-// ---- normal mode form ----
+// ---------------- normal mode ----------------
 function renderNormalForm(group, side, level, zone) {
   const entry = getActiveEntry(level, zone, side, group);
   const opts = group === 'PZ' ? PZ_OPTIONS : TZ_OPTIONS;
   const primaryLabel = group === 'PZ' ? 'DWI/ADC (dominante)' : 'T2W (dominante)';
-  const primaryVal = group === 'PZ' ? entry.dwi : entry.t2;
   let html = `<div class="field"><label>${primaryLabel}</label><select class="wide" id="primarySelect"></select><div class="opt-desc" id="primaryDesc"></div></div>`;
   if (group === 'PZ' && entry.dwi === 3) {
     html += `<div class="field"><label>DCE</label><div class="zone-toggle">
@@ -1619,8 +1653,7 @@ function wireNormalForm(group) {
   const entry = editingLesionId ? (lesions[selectedId]||[]).find(e=>e.lesionId===editingLesionId) : draft;
   const opts = group === 'PZ' ? PZ_OPTIONS : TZ_OPTIONS;
   const primarySelect = document.getElementById('primarySelect');
-  const primaryVal = group === 'PZ' ? entry.dwi : entry.t2;
-  renderOptions(primarySelect, opts, primaryVal);
+  renderOptions(primarySelect, opts, group==='PZ'?entry.dwi:entry.t2);
   const primaryDesc = document.getElementById('primaryDesc');
   const upd = () => { const f = opts.find(o=>String(o[0])===primarySelect.value); primaryDesc.textContent = f?f[1]:''; };
   upd();
@@ -1629,9 +1662,7 @@ function wireNormalForm(group) {
     upd(); renderScoringPanel();
   });
   if (group === 'PZ' && entry.dwi === 3) {
-    document.querySelectorAll('#scoringPanel [data-dce]').forEach(btn => {
-      btn.addEventListener('click', () => { entry.dce = btn.dataset.dce; renderScoringPanel(); });
-    });
+    document.querySelectorAll('#scoringPanel [data-dce]').forEach(btn => btn.addEventListener('click', () => { entry.dce = btn.dataset.dce; renderScoringPanel(); }));
   }
   if (group === 'TZ') {
     const dwiSelect = document.getElementById('dwiSelect');
@@ -1648,17 +1679,14 @@ function wireNormalForm(group) {
   document.getElementById('distApexInput').addEventListener('input', e => { entry.distApex = e.target.value?Number(e.target.value):null; });
   document.getElementById('adcInput').addEventListener('input', e => { entry.adc = e.target.value?Number(e.target.value):null; });
   document.getElementById('sdInput').addEventListener('input', e => { entry.sd = e.target.value?Number(e.target.value):null; });
-  document.querySelectorAll('#scoringPanel [data-contact]').forEach(btn => {
-    btn.addEventListener('click', () => { entry.contactCapsule = btn.dataset.contact; renderScoringPanel(); });
-  });
+  document.querySelectorAll('#scoringPanel [data-contact]').forEach(btn => btn.addEventListener('click', () => { entry.contactCapsule = btn.dataset.contact; renderScoringPanel(); }));
   document.getElementById('epeSelect').addEventListener('change', e => { entry.epe = e.target.value?Number(e.target.value):null; });
   document.getElementById('saveLesionBtn').addEventListener('click', () => {
     entry.category = computeCategory(entry);
     if (!entry.category) return;
     if (!lesions[selectedId]) lesions[selectedId] = [];
     if (editingLesionId) {
-      const idx = lesions[selectedId].findIndex(e=>e.lesionId===editingLesionId);
-      lesions[selectedId][idx] = entry;
+      lesions[selectedId][lesions[selectedId].findIndex(e=>e.lesionId===editingLesionId)] = entry;
     } else {
       entry.lesionId = lesionCounter++; lesions[selectedId].push(entry); editingLesionId = entry.lesionId; draft = null;
     }
@@ -1668,25 +1696,21 @@ function wireNormalForm(group) {
   if (cancelBtn) cancelBtn.addEventListener('click', () => { editingLesionId = null; renderScoringPanel(); });
 }
 
-// ---- creative mode form ----
+// ---------------- creative mode ----------------
 function renderCreativeForm(group, side, level, zone) {
   const entry = getActiveEntry(level, zone, side, group);
   const opts = group === 'PZ' ? PZ_OPTIONS : TZ_OPTIONS;
   if (!entry.selected) entry.selected = [];
-  let html = `<div class="field"><label>Seleziona tutti i criteri che sembrano applicarsi (anche piu di uno)</label></div>
-    <div class="criteria-list">`;
-  opts.forEach(([n, desc]) => {
+  let html = `<div class="field"><label>Seleziona tutti i criteri che sembrano applicarsi (anche piu di uno)</label></div><div class="criteria-list">`;
+  opts.forEach(([n,desc]) => {
     const checked = entry.selected.includes(n);
-    html += `<label class="criteria-item ${checked?'checked':''}" data-crit="${n}">
-      <input type="checkbox" value="${n}" ${checked?'checked':''}>
-      <span class="criteria-num">${n}</span><span>${desc}</span>
-    </label>`;
+    html += `<label class="criteria-item ${checked?'checked':''}" data-crit="${n}"><input type="checkbox" value="${n}" ${checked?'checked':''}><span class="criteria-num">${n}</span><span>${desc}</span></label>`;
   });
   html += `</div>`;
   const minV = entry.selected.length ? Math.min(...entry.selected) : null;
   const maxV = entry.selected.length ? Math.max(...entry.selected) : null;
   html += `<div class="range-bar-wrap">
-    <div class="range-track"><div class="range-fill" id="rangeFill"></div></div>
+    <div class="range-track"><div class="range-fill" id="rangeFill" style="${minV?`left:${(minV-1)*25}%;width:${(maxV-minV)*25+2}%;`:'display:none;'}"></div></div>
     <div class="range-ticks">${[1,2,3,4,5].map(n=>`<span class="${minV&&n>=minV&&n<=maxV?'in-range':''}">${n}</span>`).join('')}</div>
     <div class="range-label">${minV ? `Range suggerito: <b>${minV}${minV!==maxV?'&ndash;'+maxV:''}</b>` : 'Nessun criterio selezionato'}</div>
   </div>
@@ -1717,8 +1741,7 @@ function wireCreativeForm(group) {
     entry.rangeMax = Math.max(...entry.selected);
     if (!lesions[selectedId]) lesions[selectedId] = [];
     if (editingLesionId) {
-      const idx = lesions[selectedId].findIndex(e=>e.lesionId===editingLesionId);
-      lesions[selectedId][idx] = entry;
+      lesions[selectedId][lesions[selectedId].findIndex(e=>e.lesionId===editingLesionId)] = entry;
     } else {
       entry.lesionId = lesionCounter++; lesions[selectedId].push(entry); editingLesionId = entry.lesionId; draft = null;
     }
@@ -1728,6 +1751,7 @@ function wireCreativeForm(group) {
   if (cancelBtn) cancelBtn.addEventListener('click', () => { editingLesionId = null; renderScoringPanel(); });
 }
 
+// ---------------- shared: lesion list + drawing buttons ----------------
 function wireCommonHandlers() {
   document.querySelectorAll('#scoringPanel [data-lesion]').forEach(item => {
     item.addEventListener('click', e => {
@@ -1752,8 +1776,6 @@ function wireCommonHandlers() {
   if (newBtn) newBtn.addEventListener('click', () => { editingLesionId = null; draft = null; renderScoringPanel(); });
   wireDrawButtons();
 }
-
-// ---- shared: 3-panel drawing buttons (used by both normal and creative forms) ----
 function drawButtonsHtml(entry) {
   const d = entry.drawings || {};
   const btn = (panel, label) => {
@@ -1761,11 +1783,7 @@ function drawButtonsHtml(entry) {
     return `<button class="secondary draw-panel-btn" data-drawpanel="${panel}" style="margin-top:0;flex:1;padding:7px 4px;font-size:10.5px;${has?'border-color:var(--accent);color:var(--accent);':''}">${has?'&#10003; ':''}${label}</button>`;
   };
   return `<div class="field"><label>Contorno disegnato a mano (per proiezione)</label>
-    <div style="display:flex;gap:6px;">
-      ${btn('axial','Assiale')}
-      ${btn('coronal','Coronale')}
-      ${btn('sagittal','Sagittale')}
-    </div>
+    <div style="display:flex;gap:6px;">${btn('axial','Assiale')}${btn('coronal','Coronale')}${btn('sagittal','Sagittale')}</div>
   </div>`;
 }
 function wireDrawButtons() {
@@ -1774,7 +1792,9 @@ function wireDrawButtons() {
   });
 }
 
-// ============ mode toggle ============
+// ============================================================
+// MODE TOGGLE + AXIAL CLICK / LEVEL NAVIGATION
+// ============================================================
 function updateModeButtons() {
   document.getElementById('modeNormalBtn').classList.toggle('active', currentMode==='normal');
   document.getElementById('modeCreativeBtn').classList.toggle('active', currentMode==='creative');
@@ -1782,14 +1802,13 @@ function updateModeButtons() {
 document.getElementById('modeNormalBtn').addEventListener('click', () => { currentMode='normal'; editingLesionId=null; draft=null; updateModeButtons(); renderScoringPanel(); });
 document.getElementById('modeCreativeBtn').addEventListener('click', () => { currentMode='creative'; editingLesionId=null; draft=null; updateModeButtons(); renderScoringPanel(); });
 
-// ============ axial click handling ============
 function attachClicks() {
   LEVEL_ORDER.forEach(level => {
     sectorsForLevel(level).forEach(el => {
       el.addEventListener('click', e => {
         e.stopPropagation();
         const sectors = sectorsForLevel(level);
-        const m = el.id.match(/^(base|mid|apex)_(AFS|TZa|TZp|PZa|PZpl|PZpm|CZ)_(R|L)$/);
+        const m = el.id.match(AXIAL_SECTOR_RE);
         if (selectedId === el.id) {
           sectors.forEach(s => s.classList.remove('sector-dimmed'));
           selectedId = null; editingLesionId = null; draft = null;
@@ -1806,7 +1825,6 @@ function attachClicks() {
   });
 }
 attachClicks();
-renderScoringPanel();
 
 const stageLabel = document.getElementById('stageLabel');
 function setLevel(idx) {
@@ -1818,7 +1836,7 @@ function setLevel(idx) {
   selectedId = null; editingLesionId = null; draft = null;
   sectorsForLevel(level).forEach(s => s.classList.remove('sector-dimmed'));
   clearSectorSync();
-  if (typeof rebuildDrawSvg === 'function') { deactivateDrawMode(); rebuildDrawSvg('axial'); }
+  if (typeof deactivateDrawMode === 'function') { deactivateDrawMode(); rebuildDrawSvg('axial'); }
   renderScoringPanel();
 }
 setLevel(0);
@@ -1828,344 +1846,9 @@ const stage = document.getElementById('stage');
 stage.addEventListener('wheel', e => { e.preventDefault(); setLevel(currentIdx + (e.deltaY > 0 ? 1 : -1)); }, { passive: false });
 document.addEventListener('keydown', e => { if (e.key==='ArrowUp') setLevel(currentIdx-1); if (e.key==='ArrowDown') setLevel(currentIdx+1); });
 
-// ============ exam-level metadata & findings ============
-const meta = { institute:'', patient:'', pid:'', indication:'', psa:null, ap:null, lr:null, cc:null,
-  mdc:null, altri:'', nodes:'normal', sv:'normal', bones:'normal', svSide:'',
-  nodesSite:'', nodesSize:null, bonesSite:'', bonesSize:null, bladder:'negative', bladderNote:'', fluid:'negative', fluidNote:'',
-  physician:'', tsrm:'',
-  tecnica: "Esame eseguito su apparecchiatura RM da 3 Tesla con utilizzo di due bobine phased-array di superficie da 30 canali ciascuna (totale 60 canali).\nRM multiparametrica con protocollo secondo linee guida PI-RADS v2.1.\n- Sequenze TSE pesate in T2 (T2w) multiplanari con FOV mirato ad elevata risoluzione spaziale.\n- Sequenze pesate in diffusione (DWI) con tre valori di b nativi (100, 200, 1000 mm2/s) e b calcolato di 1500mm2/s; mappe ADC.\n- Sequenze GRE 3D T1 pesate dinamiche dopo somministrazione di mezzo di contrasto a base di gadolinio (DCE), con sottrazione." };
-
-['metaInstitute','metaPatient','metaPid','metaIndication','metaPsa','metaMdc','metaAp','metaLr','metaCc','metaPhysician','metaTsrm'].forEach(id => {
-  document.getElementById(id).addEventListener('input', e => {
-    const key = id.replace('meta','').replace(/^./,c=>c.toLowerCase());
-    const numeric = ['psa','mdc','ap','lr','cc'].includes(key);
-    meta[key] = numeric ? (e.target.value?Number(e.target.value):null) : e.target.value;
-    updateMetaReadout(); generateReport();
-  });
-});
-document.getElementById('metaTecnica').value = meta.tecnica;
-document.getElementById('metaTecnica').addEventListener('input', e => { meta.tecnica = e.target.value; generateReport(); });
-function computeVolumeDensity() {
-  if (!(meta.ap && meta.lr && meta.cc)) return { volume:null, density:null };
-  const volume = 0.52 * (meta.ap/10) * (meta.lr/10) * (meta.cc/10);
-  const density = (meta.psa && volume) ? meta.psa / volume : null;
-  return { volume, density };
-}
-function updateMetaReadout() {
-  const { volume, density } = computeVolumeDensity();
-  const volTxt = volume ? volume.toFixed(1)+' cc' : '--';
-  const densTxt = density ? density.toFixed(2)+' ng/ml/cc'+(density>=0.20?' (\u22650.20)':'') : '-- ng/ml/cc';
-  document.getElementById('metaReadout').textContent = `${volTxt} \u00b7 ${densTxt}`;
-}
-updateMetaReadout();
-
-// exam findings fields (built dynamically)
-const examFieldsHolder = document.getElementById('examFieldsHolder');
-const EXAM_FIELDS = [
-  { key:'nodes', label:'Linfonodi pelvici', off:'normal', on:'suspicious', offL:'Non significativi', onL:'Sospetti', detail:'nodes' },
-  { key:'bones', label:'Ossa', off:'normal', on:'suspicious', offL:'Non evidenza di lesioni', onL:'Sospette', detail:'bones' },
-  { key:'bladder', label:'Vescica', off:'negative', on:'positive', offL:'Nella norma', onL:'Reperti patologici', detail:'bladder' },
-  { key:'sv', label:'Vescicole seminali', off:'normal', on:'suspicious', offL:'Nei limiti', onL:'Sospette', detail:'sv' },
-  { key:'fluid', label:'Falda liquida periprostatica', off:'negative', on:'positive', offL:'Assente', onL:'Presente', detail:'fluid' },
-];
-let examHtml = '';
-EXAM_FIELDS.forEach(f => {
-  examHtml += `<div class="meta-field">
-    <div class="exam-row-title">${f.label}</div>
-    <div class="zone-toggle">
-      <button data-exam="${f.key}" data-val="${f.off}" class="exam-toggle active">${f.offL}</button>
-      <button data-exam="${f.key}" data-val="${f.on}" class="exam-toggle">${f.onL}</button>
-    </div>
-    <div class="exam-detail" id="detail-${f.key}" style="display:none"></div>
-  </div>`;
-});
-examFieldsHolder.innerHTML = examHtml;
-
-document.getElementById('detail-nodes').innerHTML = `
-  <select id="nodesSite"><option value="">-- sede --</option>
-    <option value="otturatorio">Otturatorio</option><option value="iliaco esterno">Iliaco esterno</option>
-    <option value="iliaco interno">Iliaco interno</option><option value="iliaco comune">Iliaco comune</option>
-    <option value="presacrale">Presacrale</option><option value="inguinale">Inguinale</option></select>
-  <input type="number" id="nodesSize" placeholder="mm">`;
-document.getElementById('detail-bones').innerHTML = `<input type="text" id="bonesSite" placeholder="sede"><input type="number" id="bonesSize" placeholder="mm">`;
-document.getElementById('detail-bladder').innerHTML = `<input type="text" id="bladderNote" placeholder="descrizione">`;
-document.getElementById('detail-sv').innerHTML = `<select id="svSide"><option value="">-- lato --</option>
-  <option value="destra">Destra</option><option value="sinistra">Sinistra</option><option value="bilaterale">Bilaterale</option></select>`;
-document.getElementById('detail-fluid').innerHTML = `<input type="text" id="fluidNote" placeholder="es. modica quantita">`;
-
-['nodesSite','nodesSize','bonesSite','bonesSize','bladderNote','svSide','fluidNote'].forEach(id => {
-  const el = document.getElementById(id);
-  el.addEventListener('input', () => {
-    meta[id] = (id==='nodesSize'||id==='bonesSize') ? (el.value?Number(el.value):null) : el.value;
-    if (id === 'svSide') setSvHighlight(meta.sv === 'suspicious' ? meta.svSide : null);
-    generateReport();
-  });
-  el.addEventListener('change', () => {
-    meta[id] = (id==='nodesSize'||id==='bonesSize') ? (el.value?Number(el.value):null) : el.value;
-    if (id === 'svSide') setSvHighlight(meta.sv === 'suspicious' ? meta.svSide : null);
-    generateReport();
-  });
-});
-
-const EXAM_ON_VALUES = { nodes:'suspicious', bones:'suspicious', bladder:'positive', sv:'suspicious', fluid:'positive' };
-document.querySelectorAll('.exam-toggle').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const exam = btn.dataset.exam, val = btn.dataset.val;
-    meta[exam] = val;
-    document.querySelectorAll(`.exam-toggle[data-exam="${exam}"]`).forEach(b => b.classList.toggle('active', b.dataset.val===val));
-    const detail = document.getElementById(`detail-${exam}`);
-    if (detail) detail.style.display = (val === EXAM_ON_VALUES[exam]) ? 'flex' : 'none';
-    if (exam === 'sv') setSvHighlight(val === 'suspicious' ? meta.svSide : null);
-    generateReport();
-  });
-});
-
-// ============ report generation (matches IEO-style structured report, table included) ============
-const ZONE_ORIGIN_LABEL = { R:'destro', L:'sinistro' };
-const ZONE_ORIGIN_LABEL_ABBR = { R:'dx', L:'sn' };
-const reportOutput = document.getElementById('reportOutput');
-let reportManuallyEdited = false;
-reportOutput.addEventListener('input', () => { reportManuallyEdited = true; });
-
-const POSITION_PHRASE = { PZa:'anteriore', PZpl:'postero-laterale', PZpm:'postero-mediale', TZa:'anteriore', TZp:'posteriore', CZ:'centrale', AFS:'anteriore' };
-const LIKELIHOOD_PHRASE = { 1:'molto improbabile', 2:'improbabile', 3:'dubbia', 4:'probabile', 5:'molto probabile' };
-const EPE_PHRASE = { 1:'molto poco probabile', 2:'poco probabile', 3:'dubbia', 4:'probabile', 5:'molto probabile' };
-
-const REFERENCES = [
-  'Turkbey B, et al. PI-RADS Steering Committee: The PI-RADS Multiparametric MRI and MRI-directed Biopsy Pathway. Eur Urol 2019.',
-  'Kryvenko ON, Epstein JI. Prostate cancer grading: a decade after the 2005 modified system. Urology 2014;83(4):869-874.',
-  'Humphrey PA, et al. The 2016 WHO Classification of Tumours of the Urinary System and Male Genital Organs. Eur Urol 2016;70(1):106-119.',
-  'Sathianathen NJ, et al. Negative predictive value of multiparametric MRI in biopsy-naive men. Eur Urol 2020;78:402-414.',
-];
-
-function buildTableRows() {
-  const entries = allLesionsFlat().filter(e => e.mode === 'normal' && e.category).sort((a,b)=>b.category-a.category);
-  return entries.map((e,i) => ({
-    n: i+1,
-    size: e.size || '',
-    site: e.group,
-    level: LEVEL_NAMES[e.level],
-    distApex: e.distApex != null ? e.distApex+' mm' : '',
-    t2w: e.group==='PZ' ? (e.t2Correlate||'') : e.t2,
-    dwi: e.dwi || '',
-    dce: e.group==='PZ' ? (e.dce==='yes'?1:e.dce==='no'?0:'') : '',
-    adc: e.adc != null ? e.adc : '',
-    sd: e.sd != null ? e.sd : '',
-    contact: e.contactCapsule === 'yes' ? 'yes' : e.contactCapsule === 'no' ? 'no' : '',
-    position: `${POSITION_PHRASE[e.zone]||''} ${ZONE_ORIGIN_LABEL_ABBR[e.side]}`,
-    epe: e.epe || '',
-    pirads: e.category,
-    _entry: e,
-  }));
-}
-
-function buildReportLines(includeTable) {
-  const rows = buildTableRows();
-  const { volume, density } = computeVolumeDensity();
-  let L = [];
-
-  L.push('RM MULTIPARAMETRICA DELLA PROSTATA');
-  if (meta.patient || meta.pid) L.push(`${meta.patient||'....'}    ID Paziente: ${meta.pid||'....'}`);
-  L.push('');
-  L.push(`INDICAZIONI: ${meta.indication || '....'}`);
-  L.push(`PSA (ng/mL): ${meta.psa != null ? meta.psa : '....'}`);
-  L.push('');
-
-  if (meta.ap && meta.lr && meta.cc) {
-    L.push(`PROSTATA: ${meta.ap} x ${meta.lr} x ${meta.cc} mm    Volume: ${volume.toFixed(2)} mL    PSA Density: ${density!=null?density.toFixed(2):'--'}`);
-    L.push('');
-  }
-
-  if (includeTable && rows.length > 0) {
-    L.push('Lesion | Size | Site | Level | Dist.Apex | T2W | DWI | DCE | ADC | SD | Contact | Position | EPE | PI-RADS');
-    rows.forEach(r => {
-      L.push(`${r.n} | ${r.size} | ${r.site} | ${r.level} | ${r.distApex} | ${r.t2w} | ${r.dwi} | ${r.dce} | ${r.adc} | ${r.sd} | ${r.contact} | ${r.position} | ${r.epe} | ${r.pirads}`);
-    });
-    L.push('');
-  }
-
-  L.push('TECNICA:');
-  L.push(meta.tecnica);
-  L.push('');
-
-  L.push('OSSERVAZIONI:');
-  L.push(`- PSA: ${meta.psa!=null?meta.psa:'....'} ng/mL`);
-  if (meta.ap && meta.lr && meta.cc) L.push(`- Prostata di ${meta.ap} x ${meta.lr} x ${meta.cc} mm (Volume: ${volume.toFixed(2)} mL); PSA Density: ${density!=null?density.toFixed(2):'--'}`);
-  L.push('');
-
-  rows.forEach(r => {
-    const e = r._entry;
-    L.push(`LESIONE PROSTATA ${r.n}:`);
-    const zoneLabel = e.group === 'PZ' ? 'zona periferica' : 'zona di transizione';
-    L.push(`Nella ${zoneLabel} ${ZONE_ORIGIN_LABEL[e.side]}, a livello ${LEVEL_NAMES[e.level].toLowerCase()}, e evidente un'alterazione, nel contesto della quale e ${LIKELIHOOD_PHRASE[e.category]||'--'} la presenza di malattia clinicamente significativa (PI-RADS ${e.category}).`);
-    if (e.contactCapsule === 'yes') {
-      L.push(`La lesione descritta giunge a contatto con il versante ${POSITION_PHRASE[e.zone]||''} ${ZONE_ORIGIN_LABEL[e.side]} della capsula prostatica${e.epe?` con estensione extraprostatica ${EPE_PHRASE[e.epe]||'--'} (EPE Score ${e.epe})`:''}.`);
-    } else if (e.contactCapsule === 'no') {
-      L.push('La lesione descritta non giunge a contatto con la capsula prostatica.');
-    }
-    L.push('');
-  });
-  L.push(`Vescicole seminali ${meta.sv==='suspicious'?`con aspetto sospetto${meta.svSide?' ('+meta.svSide+')':''}`:'nei limiti'}.`);
-  L.push('');
-
-  L.push('CONCLUSIONI');
-  if (rows.length === 0) {
-    L.push('Nessun reperto target identificato in questo esame.');
-  } else {
-    rows.forEach(r => {
-      L.push(`Lesione N\u00ba${r.n} PI-RADS ${r.pirads} in ${r.site} ${ZONE_ORIGIN_LABEL[r._entry.side]} (${r.level.toLowerCase()})`);
-    });
-  }
-  L.push('');
-
-  if (meta.physician) L.push(`Medico refertante:\n${meta.physician}`);
-  if (meta.tsrm) L.push(`\nT.S.R.M.\n${meta.tsrm}`);
-  L.push('');
-
-  L.push('LEGENDA:');
-  L.push('');
-  L.push('PI-RADS 1 - Molto bassa (la presenza di tumore clinicamente significativo e molto improbabile)');
-  L.push('PI-RADS 2 - Bassa (la presenza di tumore clinicamente significativo e improbabile)');
-  L.push('PI-RADS 3 - Intermedia (la presenza di tumore clinicamente significativo e dubbia)');
-  L.push('PI-RADS 4 - Alta (la presenza di tumore clinicamente significativo e probabile)');
-  L.push('PI-RADS 5 - Molto alta (la presenza di tumore clinicamente significativo e molto probabile)');
-  L.push('PZ = zona periferica, TZ = zona di transizione, AFS = stroma fibromuscolare anteriore, CZ = zona centrale');
-  L.push('EPE = estensione extraprostatica');
-  L.push('');
-
-  L.push('RIFERIMENTI BIBLIOGRAFICI:');
-  L.push('');
-  REFERENCES.forEach((r,i) => L.push(`[${i+1}] ${r}`));
-  return L;
-}
-
-function generateReport() {
-  if (reportManuallyEdited) return;
-  reportOutput.value = buildReportLines(true).join('\n');
-}
-function buildPrintView() {
-  const printArea = document.getElementById('printArea');
-  const rows = buildTableRows();
-
-  // which axial sector ids have a registered lesion, to know what to keep colored on the maps
-  const litSectors = new Set(Object.keys(lesions).filter(id => (lesions[id]||[]).some(e => e.mode==='normal' && e.category)));
-
-  function forcePrintSvAndDecorative(clone, isSagittal) {
-    // belt-and-braces: re-apply the base white/cream color to every decorative + SV piece
-    // in the cloned markup, so the full vesicle silhouette always shows in print, not just
-    // whatever sub-piece happens to carry the blue "sospetta" tint at the moment of cloning.
-    clone.querySelectorAll('[id]').forEach(el => {
-      const id = el.id || '';
-      const isSvPattern = isSagittal ? SV_ID_RE.sagittal.test(id) : SV_ID_RE.coronal.test(id);
-      if (isSvPattern) {
-        // keep as-is (this is the real SV piece; if the blue duplicate sits on top, it already
-        // cloned with it -- we only need to guarantee the base piece itself is cream, not broken)
-        el.style.setProperty('fill', '#fffdfb', 'important');
-      }
-    });
-    // decorative near-white / broken-gradient shapes (the internal squiggle lines, outlines, etc.)
-    clone.querySelectorAll('path').forEach(el => {
-      const id = el.id || '';
-      const isSector = isSagittal ? SECTOR_ID_RE.sagittal.test(id) : SECTOR_ID_RE.coronal.test(id);
-      const isSvP = isSagittal ? SV_ID_RE.sagittal.test(id) : SV_ID_RE.coronal.test(id);
-      if (!isSector && !isSvP) {
-        const style = el.getAttribute('style') || '';
-        if (isNearWhite(el) || isUnresolvedGradient(el) || /fill:\s*#f{5,6}/i.test(style)) {
-          el.style.setProperty('fill', '#ffffff', 'important');
-          el.style.setProperty('opacity', '1', 'important');
-        }
-      }
-    });
-  }
-
-  function cloneGrayed(svgSelector, idTest, isSagittal) {
-    const svgEl = document.querySelector(svgSelector);
-    if (!svgEl) return '';
-    const clone = svgEl.cloneNode(true);
-    if (litSectors.size > 0) {
-      clone.querySelectorAll('[id]').forEach(el => {
-        if (idTest(el.id) && !isLitMatch(el.id)) {
-          el.style.setProperty('opacity', '0.22', 'important');
-        }
-      });
-    }
-    forcePrintSvAndDecorative(clone, isSagittal);
-    return clone.outerHTML;
-  }
-  function isLitMatch(id) {
-    // does this coronal/sagittal id correspond exactly to any sector that has a lesion?
-    // (was using startsWith before -- too loose, could over-match; now anchored precisely)
-    for (const sectorId of litSectors) {
-      const m = sectorId.match(/^(base|mid|apex)_(AFS|TZa|TZp|PZa|PZpl|PZpm|CZ)_(R|L)$/);
-      if (!m) continue;
-      const [, level, zone, side] = m;
-      const macro = MACRO[zone];
-      const coronalPrefix = `coronal_${level}_${macro}`.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const sagittalPrefix = `sagittal_${level}_${macro}`.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const re = new RegExp(`^(${coronalPrefix}|${sagittalPrefix})(?:_p\\d+)?_${side}(?:_p\\d+)?$`);
-      if (re.test(id)) return true;
-    }
-    return false;
-  }
-
-  const activeLevel = LEVEL_ORDER[currentIdx];
-  const axialSvg = document.querySelector(`#discLayers .disc-layer[data-level="${activeLevel}"] svg`);
-  const coronalHtml = cloneGrayed('#coronalHolder svg', id => SECTOR_ID_RE.coronal.test(id), false);
-  const activeSide = document.querySelector('#sagittalHolder .sag-layer.active');
-  const sagittalHtml = activeSide ? cloneGrayed(`#sagittalHolder .sag-layer[data-side="${activeSide.dataset.side}"] svg`, id => SECTOR_ID_RE.sagittal.test(id), true) : '';
-
-  let tableHtml = '';
-  if (rows.length) {
-    tableHtml = `<table><thead><tr>
-      <th>Lesion</th><th>Size</th><th>Site</th><th>Level</th><th>Dist.Apex</th><th>T2W</th><th>DWI</th><th>DCE</th><th>ADC</th><th>SD</th><th>Contact</th><th>Position</th><th>EPE</th><th>PI-RADS</th>
-      </tr></thead><tbody>` +
-      rows.map(r => `<tr><td>${r.n}</td><td>${r.size}</td><td>${r.site}</td><td>${r.level}</td><td>${r.distApex}</td><td>${r.t2w}</td><td>${r.dwi}</td><td>${r.dce}</td><td>${r.adc}</td><td>${r.sd}</td><td>${r.contact}</td><td>${r.position}</td><td>${r.epe}</td><td><b>${r.pirads}</b></td></tr>`).join('') +
-      `</tbody></table>`;
-  }
-
-  printArea.innerHTML = `
-    <div class="ph-header">
-      <div>${meta.institute?('<b>'+meta.institute+'</b>'):''}</div>
-      <div>${meta.patient?('<b>'+meta.patient+'</b><br>'):''}${meta.pid?('ID: '+meta.pid):''}</div>
-    </div>
-    <div class="ph-title">RM MULTIPARAMETRICA DELLA PROSTATA</div>
-    ${tableHtml}
-    <div class="ph-body">
-      <div class="ph-left">
-        <div class="ph-text">${(() => {
-          const lines = buildReportLines(false);
-          const startIdx = lines.findIndex(l => l.startsWith('INDICAZIONI:'));
-          return (startIdx >= 0 ? lines.slice(startIdx) : lines).join('\n').replace(/</g,'&lt;');
-        })()}</div>
-      </div>
-      <div class="ph-right">
-        ${axialSvg?`<figure class="ph-map-fig">${axialSvg.outerHTML}<figcaption>${LEVEL_NAMES[activeLevel]}</figcaption></figure>`:''}
-        ${coronalHtml?`<figure class="ph-map-fig">${coronalHtml}<figcaption>Coronale</figcaption></figure>`:''}
-        ${sagittalHtml?`<figure class="ph-map-fig">${sagittalHtml}<figcaption>Sagittale ${activeSide?activeSide.dataset.side:''}</figcaption></figure>`:''}
-      </div>
-    </div>
-  `;
-}
-
-document.getElementById('regenReportBtn').addEventListener('click', () => { reportManuallyEdited=false; generateReport(); });
-document.getElementById('copyReportBtn').addEventListener('click', () => {
-  reportOutput.select();
-  navigator.clipboard.writeText(reportOutput.value).catch(()=>document.execCommand('copy'));
-});
-document.getElementById('printReportBtn').addEventListener('click', () => { buildPrintView(); window.print(); });
-generateReport();
-
-// ============ freehand drawing tool (creative + normal mode), generalized to 3 panels ============
-const PANELS = {
-  axial:    { holder: drawOverlayHolder, svg: null, defs: null,
-              getViewBox: () => { const level = LEVEL_ORDER[currentIdx]; const svgEl = document.querySelector(`#discLayers .disc-layer[data-level="${level}"] svg`); return svgEl ? svgEl.getAttribute('viewBox') : '0 0 500 500'; } },
-  coronal:  { holder: document.getElementById('drawOverlayHolderCoronal'), svg: null, defs: null,
-              getViewBox: () => { const svgEl = document.querySelector('#coronalHolder svg'); return svgEl ? svgEl.getAttribute('viewBox') : '0 0 678 900'; } },
-  sagittal: { holder: document.getElementById('drawOverlayHolderSagittal'), svg: null, defs: null,
-              getViewBox: () => { const svgEl = document.querySelector('#sagittalHolder .sag-layer.active svg'); return svgEl ? svgEl.getAttribute('viewBox') : '0 0 417 618'; } },
-};
-let activePanel = null;
-
+// ============================================================
+// FREEHAND DRAWING TOOL -- available in both scoring modes, on all 3 panels independently
+// ============================================================
 function rebuildDrawSvg(panel) {
   const P = PANELS[panel];
   const vb = P.getViewBox();
@@ -2183,8 +1866,7 @@ function smoothPathFromPoints(pts) {
     const mx = (pts[i].x + pts[i+1].x) / 2, my = (pts[i].y + pts[i+1].y) / 2;
     d += `Q ${pts[i].x.toFixed(1)},${pts[i].y.toFixed(1)} ${mx.toFixed(1)},${my.toFixed(1)} `;
   }
-  d += 'Z';
-  return d;
+  return d + 'Z';
 }
 function boundsOf(pts) {
   const xs = pts.map(p=>p.x), ys = pts.map(p=>p.y);
@@ -2195,11 +1877,9 @@ function svgPointFromEvent(panel, evt) {
   const svg = PANELS[panel].svg;
   const pt = svg.createSVGPoint();
   pt.x = evt.clientX; pt.y = evt.clientY;
-  const ctm = svg.getScreenCTM().inverse();
-  const p = pt.matrixTransform(ctm);
+  const p = pt.matrixTransform(svg.getScreenCTM().inverse());
   return { x: p.x, y: p.y };
 }
-
 function startDrawing(panel, evt) {
   isDrawing = true;
   rawPoints = [svgPointFromEvent(panel, evt)];
@@ -2215,18 +1895,15 @@ function startDrawing(panel, evt) {
 function continueDrawing(panel, evt) {
   if (!isDrawing) return;
   rawPoints.push(svgPointFromEvent(panel, evt));
-  const d = rawPoints.map((p,i) => `${i===0?'M':'L'} ${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-  liveStrokeEl.setAttribute('d', d);
+  liveStrokeEl.setAttribute('d', rawPoints.map((p,i) => `${i===0?'M':'L'} ${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '));
 }
-
 function activeEntryFromSelection() {
   if (!selectedId) return null;
-  const m = selectedId.match(/^(base|mid|apex)_(AFS|TZa|TZp|PZa|PZpl|PZpm|CZ)_(R|L)$/);
+  const m = selectedId.match(AXIAL_SECTOR_RE);
   if (!m) return null;
   const [, level, zone, side] = m;
   return getActiveEntry(level, zone, side, MACRO[zone]);
 }
-
 function activateDrawMode(panel) {
   if (!selectedId) return;
   if (activePanel && activePanel !== panel) deactivateDrawMode(activePanel);
@@ -2234,8 +1911,7 @@ function activateDrawMode(panel) {
   rebuildDrawSvg(panel);
   const P = PANELS[panel];
   P.holder.classList.add('active');
-  const toolbar = panel === 'axial' ? drawToolbar : document.getElementById(`drawToolbar${panel.charAt(0).toUpperCase()+panel.slice(1)}`);
-  toolbar.classList.add('active');
+  toolbarFor(panel).classList.add('active');
   P.svg.style.pointerEvents = 'auto';
   P.svg.addEventListener('pointerdown', onPointerDown);
   P.svg.addEventListener('pointermove', onPointerMove);
@@ -2247,15 +1923,16 @@ function deactivateDrawMode(panel) {
   if (!panel) return;
   const P = PANELS[panel];
   P.holder.classList.remove('active');
-  const toolbar = panel === 'axial' ? drawToolbar : document.getElementById(`drawToolbar${panel.charAt(0).toUpperCase()+panel.slice(1)}`);
-  toolbar.classList.remove('active');
+  toolbarFor(panel).classList.remove('active');
   if (P.svg) P.svg.style.pointerEvents = 'none';
   if (activePanel === panel) activePanel = null;
 }
-
+function toolbarFor(panel) {
+  return document.getElementById(`drawToolbar${panel.charAt(0).toUpperCase()+panel.slice(1)}`);
+}
 function onPointerDown(evt) { evt.preventDefault(); startDrawing(activePanel, evt); }
 function onPointerMove(evt) { evt.preventDefault(); continueDrawing(activePanel, evt); }
-function onPointerUp(evt) {
+function onPointerUp() {
   if (!isDrawing) return;
   isDrawing = false;
   if (liveStrokeEl) { liveStrokeEl.remove(); liveStrokeEl = null; }
@@ -2272,12 +1949,10 @@ function onPointerUp(evt) {
   renderScoringPanel();
 }
 
-// pen size + clear + done: axial toolbar (fixed ids) and mini toolbars (data-attrs) both handled here
 document.querySelectorAll('.pen-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     currentPenWidth = Number(btn.dataset.pen);
-    const scope = btn.closest('.draw-toolbar, .draw-toolbar-mini');
-    scope.querySelectorAll('.pen-btn').forEach(b => b.classList.toggle('active', b===btn));
+    btn.closest('.draw-toolbar, .draw-toolbar-mini').querySelectorAll('.pen-btn').forEach(b => b.classList.toggle('active', b===btn));
   });
 });
 function clearPanelDrawing(panel) {
@@ -2287,8 +1962,6 @@ function clearPanelDrawing(panel) {
   renderDrawnShapes(panel);
   renderScoringPanel();
 }
-document.getElementById('clearDrawBtn').addEventListener('click', () => clearPanelDrawing('axial'));
-document.getElementById('doneDrawBtn').addEventListener('click', () => { deactivateDrawMode('axial'); renderScoringPanel(); });
 document.querySelectorAll('[data-clear]').forEach(btn => btn.addEventListener('click', () => clearPanelDrawing(btn.dataset.clear)));
 document.querySelectorAll('[data-done]').forEach(btn => btn.addEventListener('click', () => { deactivateDrawMode(btn.dataset.done); renderScoringPanel(); }));
 
@@ -2306,7 +1979,6 @@ function ensureGradient(defsEl, id, color) {
   defsEl.appendChild(grad);
   return grad;
 }
-
 function renderDrawnShapes(panel) {
   const P = PANELS[panel];
   if (!P.svg) return;
@@ -2314,7 +1986,6 @@ function renderDrawnShapes(panel) {
   g.innerHTML = '';
   const currentLevel = LEVEL_ORDER[currentIdx];
   const currentSagSide = document.querySelector('#sagittalHolder .sag-layer.active')?.dataset.side;
-
   function maybeDraw(entry) {
     if (!entry.drawings || !entry.drawings[panel]) return;
     const rec = entry.drawings[panel];
@@ -2337,5 +2008,281 @@ function drawShapeRecord(rec, entry, defsEl, g) {
   path.setAttribute('stroke-width', '1.2');
   path.setAttribute('stroke-opacity', '0.7');
   g.appendChild(path);
+}
+
+// ============================================================
+// EXAM METADATA
+// ============================================================
+const meta = { institute:'', patient:'', pid:'', indication:'', psa:null, ap:null, lr:null, cc:null,
+  mdc:null, altri:'', nodes:'normal', sv:'normal', bones:'normal', svSide:'',
+  nodesSite:'', nodesSize:null, bonesSite:'', bonesSize:null, bladder:'negative', bladderNote:'', fluid:'negative', fluidNote:'',
+  physician:'', tsrm:'',
+  tecnica: "Esame eseguito su apparecchiatura RM da 3 Tesla con utilizzo di due bobine phased-array di superficie da 30 canali ciascuna (totale 60 canali).\nRM multiparametrica con protocollo secondo linee guida PI-RADS v2.1.\n- Sequenze TSE pesate in T2 (T2w) multiplanari con FOV mirato ad elevata risoluzione spaziale.\n- Sequenze pesate in diffusione (DWI) con tre valori di b nativi (100, 200, 1000 mm2/s) e b calcolato di 1500mm2/s; mappe ADC.\n- Sequenze GRE 3D T1 pesate dinamiche dopo somministrazione di mezzo di contrasto a base di gadolinio (DCE), con sottrazione." };
+
+['metaInstitute','metaPatient','metaPid','metaIndication','metaPsa','metaMdc','metaAp','metaLr','metaCc','metaPhysician','metaTsrm'].forEach(id => {
+  document.getElementById(id).addEventListener('input', e => {
+    const key = id.replace('meta','').replace(/^./,c=>c.toLowerCase());
+    const numeric = ['psa','mdc','ap','lr','cc'].includes(key);
+    meta[key] = numeric ? (e.target.value?Number(e.target.value):null) : e.target.value;
+    updateMetaReadout(); generateReport();
+  });
+});
+document.getElementById('metaTecnica').value = meta.tecnica;
+document.getElementById('metaTecnica').addEventListener('input', e => { meta.tecnica = e.target.value; generateReport(); });
+
+function computeVolumeDensity() {
+  if (!(meta.ap && meta.lr && meta.cc)) return { volume:null, density:null };
+  const volume = 0.52 * (meta.ap/10) * (meta.lr/10) * (meta.cc/10);
+  const density = (meta.psa && volume) ? meta.psa / volume : null;
+  return { volume, density };
+}
+function updateMetaReadout() {
+  const { volume, density } = computeVolumeDensity();
+  const volTxt = volume ? volume.toFixed(1)+' cc' : '--';
+  const densTxt = density ? density.toFixed(2)+' ng/ml/cc'+(density>=0.20?' (\u22650.20)':'') : '-- ng/ml/cc';
+  document.getElementById('metaReadout').textContent = `${volTxt} \u00b7 ${densTxt}`;
+}
+updateMetaReadout();
+
+// exam findings (linfonodi/ossa/vescica/vescicole/falda)
+const examFieldsHolder = document.getElementById('examFieldsHolder');
+const EXAM_FIELDS = [
+  { key:'nodes', label:'Linfonodi pelvici', off:'normal', on:'suspicious', offL:'Non significativi', onL:'Sospetti' },
+  { key:'bones', label:'Ossa', off:'normal', on:'suspicious', offL:'Non evidenza di lesioni', onL:'Sospette' },
+  { key:'bladder', label:'Vescica', off:'negative', on:'positive', offL:'Nella norma', onL:'Reperti patologici' },
+  { key:'sv', label:'Vescicole seminali', off:'normal', on:'suspicious', offL:'Nei limiti', onL:'Sospette' },
+  { key:'fluid', label:'Falda liquida periprostatica', off:'negative', on:'positive', offL:'Assente', onL:'Presente' },
+];
+examFieldsHolder.innerHTML = EXAM_FIELDS.map(f => `<div class="meta-field">
+    <div class="exam-row-title">${f.label}</div>
+    <div class="zone-toggle">
+      <button data-exam="${f.key}" data-val="${f.off}" class="exam-toggle active">${f.offL}</button>
+      <button data-exam="${f.key}" data-val="${f.on}" class="exam-toggle">${f.onL}</button>
+    </div>
+    <div class="exam-detail" id="detail-${f.key}" style="display:none"></div>
+  </div>`).join('');
+
+document.getElementById('detail-nodes').innerHTML = `
+  <select id="nodesSite"><option value="">-- sede --</option>
+    <option value="otturatorio">Otturatorio</option><option value="iliaco esterno">Iliaco esterno</option>
+    <option value="iliaco interno">Iliaco interno</option><option value="iliaco comune">Iliaco comune</option>
+    <option value="presacrale">Presacrale</option><option value="inguinale">Inguinale</option></select>
+  <input type="number" id="nodesSize" placeholder="mm">`;
+document.getElementById('detail-bones').innerHTML = `<input type="text" id="bonesSite" placeholder="sede"><input type="number" id="bonesSize" placeholder="mm">`;
+document.getElementById('detail-bladder').innerHTML = `<input type="text" id="bladderNote" placeholder="descrizione">`;
+document.getElementById('detail-sv').innerHTML = `<select id="svSide"><option value="">-- lato --</option>
+  <option value="destra">Destra</option><option value="sinistra">Sinistra</option><option value="bilaterale">Bilaterale</option></select>`;
+document.getElementById('detail-fluid').innerHTML = `<input type="text" id="fluidNote" placeholder="es. modica quantita">`;
+
+['nodesSite','nodesSize','bonesSite','bonesSize','bladderNote','svSide','fluidNote'].forEach(id => {
+  const el = document.getElementById(id);
+  const handler = () => {
+    meta[id] = (id==='nodesSize'||id==='bonesSize') ? (el.value?Number(el.value):null) : el.value;
+    if (id === 'svSide') setSvHighlight(meta.sv==='suspicious' ? meta.svSide : null);
+    generateReport();
+  };
+  el.addEventListener('input', handler);
+  el.addEventListener('change', handler);
+});
+
+const EXAM_ON_VALUES = { nodes:'suspicious', bones:'suspicious', bladder:'positive', sv:'suspicious', fluid:'positive' };
+document.querySelectorAll('.exam-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const exam = btn.dataset.exam, val = btn.dataset.val;
+    meta[exam] = val;
+    document.querySelectorAll(`.exam-toggle[data-exam="${exam}"]`).forEach(b => b.classList.toggle('active', b.dataset.val===val));
+    const detail = document.getElementById(`detail-${exam}`);
+    if (detail) detail.style.display = (val === EXAM_ON_VALUES[exam]) ? 'flex' : 'none';
+    if (exam === 'sv') setSvHighlight(val==='suspicious' ? meta.svSide : null);
+    generateReport();
+  });
+});
+
+// ============================================================
+// REPORT GENERATION (IEO-style structured report, table included)
+// ============================================================
+const ZONE_ORIGIN_LABEL = { R:'destro', L:'sinistro' };
+const ZONE_ORIGIN_LABEL_ABBR = { R:'dx', L:'sn' };
+const POSITION_PHRASE = { PZa:'anteriore', PZpl:'postero-laterale', PZpm:'postero-mediale', TZa:'anteriore', TZp:'posteriore', CZ:'centrale', AFS:'anteriore' };
+const LIKELIHOOD_PHRASE = { 1:'molto improbabile', 2:'improbabile', 3:'dubbia', 4:'probabile', 5:'molto probabile' };
+const EPE_PHRASE = { 1:'molto poco probabile', 2:'poco probabile', 3:'dubbia', 4:'probabile', 5:'molto probabile' };
+const REFERENCES = [
+  'Turkbey B, et al. PI-RADS Steering Committee: The PI-RADS Multiparametric MRI and MRI-directed Biopsy Pathway. Eur Urol 2019.',
+  'Kryvenko ON, Epstein JI. Prostate cancer grading: a decade after the 2005 modified system. Urology 2014;83(4):869-874.',
+  'Humphrey PA, et al. The 2016 WHO Classification of Tumours of the Urinary System and Male Genital Organs. Eur Urol 2016;70(1):106-119.',
+  'Sathianathen NJ, et al. Negative predictive value of multiparametric MRI in biopsy-naive men. Eur Urol 2020;78:402-414.',
+];
+const reportOutput = document.getElementById('reportOutput');
+let reportManuallyEdited = false;
+reportOutput.addEventListener('input', () => { reportManuallyEdited = true; });
+
+function buildTableRows() {
+  const entries = allLesionsFlat().filter(e => e.mode==='normal' && e.category).sort((a,b)=>b.category-a.category);
+  return entries.map((e,i) => ({
+    n: i+1, size: e.size || '', site: e.group, level: LEVEL_NAMES[e.level],
+    distApex: e.distApex!=null ? e.distApex+' mm' : '',
+    t2w: e.group==='PZ' ? (e.t2Correlate||'') : e.t2,
+    dwi: e.dwi || '', dce: e.group==='PZ' ? (e.dce==='yes'?1:e.dce==='no'?0:'') : '',
+    adc: e.adc!=null?e.adc:'', sd: e.sd!=null?e.sd:'',
+    contact: e.contactCapsule==='yes'?'yes':e.contactCapsule==='no'?'no':'',
+    position: `${POSITION_PHRASE[e.zone]||''} ${ZONE_ORIGIN_LABEL_ABBR[e.side]}`,
+    epe: e.epe || '', pirads: e.category, _entry: e,
+  }));
+}
+
+function buildReportLines(includeTable) {
+  const rows = buildTableRows();
+  const { volume, density } = computeVolumeDensity();
+  let L = [];
+  L.push('RM MULTIPARAMETRICA DELLA PROSTATA');
+  if (meta.patient || meta.pid) L.push(`${meta.patient||'....'}    ID Paziente: ${meta.pid||'....'}`);
+  L.push('');
+  L.push(`INDICAZIONI: ${meta.indication || '....'}`);
+  L.push(`PSA (ng/mL): ${meta.psa!=null?meta.psa:'....'}`);
+  L.push('');
+  if (meta.ap && meta.lr && meta.cc) {
+    L.push(`PROSTATA: ${meta.ap} x ${meta.lr} x ${meta.cc} mm    Volume: ${volume.toFixed(2)} mL    PSA Density: ${density!=null?density.toFixed(2):'--'}`);
+    L.push('');
+  }
+  if (includeTable && rows.length > 0) {
+    L.push('Lesion | Size | Site | Level | Dist.Apex | T2W | DWI | DCE | ADC | SD | Contact | Position | EPE | PI-RADS');
+    rows.forEach(r => L.push(`${r.n} | ${r.size} | ${r.site} | ${r.level} | ${r.distApex} | ${r.t2w} | ${r.dwi} | ${r.dce} | ${r.adc} | ${r.sd} | ${r.contact} | ${r.position} | ${r.epe} | ${r.pirads}`));
+    L.push('');
+  }
+  L.push('TECNICA:'); L.push(meta.tecnica); L.push('');
+  L.push('OSSERVAZIONI:');
+  L.push(`- PSA: ${meta.psa!=null?meta.psa:'....'} ng/mL`);
+  if (meta.ap && meta.lr && meta.cc) L.push(`- Prostata di ${meta.ap} x ${meta.lr} x ${meta.cc} mm (Volume: ${volume.toFixed(2)} mL); PSA Density: ${density!=null?density.toFixed(2):'--'}`);
+  L.push('');
+  rows.forEach(r => {
+    const e = r._entry;
+    L.push(`LESIONE PROSTATA ${r.n}:`);
+    const zoneLabel = e.group==='PZ' ? 'zona periferica' : 'zona di transizione';
+    L.push(`Nella ${zoneLabel} ${ZONE_ORIGIN_LABEL[e.side]}, a livello ${LEVEL_NAMES[e.level].toLowerCase()}, e evidente un'alterazione, nel contesto della quale e ${LIKELIHOOD_PHRASE[e.category]||'--'} la presenza di malattia clinicamente significativa (PI-RADS ${e.category}).`);
+    if (e.contactCapsule === 'yes') {
+      L.push(`La lesione descritta giunge a contatto con il versante ${POSITION_PHRASE[e.zone]||''} ${ZONE_ORIGIN_LABEL[e.side]} della capsula prostatica${e.epe?` con estensione extraprostatica ${EPE_PHRASE[e.epe]||'--'} (EPE Score ${e.epe})`:''}.`);
+    } else if (e.contactCapsule === 'no') {
+      L.push('La lesione descritta non giunge a contatto con la capsula prostatica.');
+    }
+    L.push('');
+  });
+  L.push(`Vescicole seminali ${meta.sv==='suspicious'?`con aspetto sospetto${meta.svSide?' ('+meta.svSide+')':''}`:'nei limiti'}.`);
+  L.push('');
+  L.push('CONCLUSIONI');
+  if (rows.length === 0) L.push('Nessun reperto target identificato in questo esame.');
+  else rows.forEach(r => L.push(`Lesione N\u00ba${r.n} PI-RADS ${r.pirads} in ${r.site} ${ZONE_ORIGIN_LABEL[r._entry.side]} (${r.level.toLowerCase()})`));
+  L.push('');
+  if (meta.physician) L.push(`Medico refertante:\n${meta.physician}`);
+  if (meta.tsrm) L.push(`\nT.S.R.M.\n${meta.tsrm}`);
+  L.push('');
+  L.push('LEGENDA:'); L.push('');
+  L.push('PI-RADS 1 - Molto bassa (la presenza di tumore clinicamente significativo e molto improbabile)');
+  L.push('PI-RADS 2 - Bassa (la presenza di tumore clinicamente significativo e improbabile)');
+  L.push('PI-RADS 3 - Intermedia (la presenza di tumore clinicamente significativo e dubbia)');
+  L.push('PI-RADS 4 - Alta (la presenza di tumore clinicamente significativo e probabile)');
+  L.push('PI-RADS 5 - Molto alta (la presenza di tumore clinicamente significativo e molto probabile)');
+  L.push('PZ = zona periferica, TZ = zona di transizione, AFS = stroma fibromuscolare anteriore, CZ = zona centrale');
+  L.push('EPE = estensione extraprostatica'); L.push('');
+  L.push('RIFERIMENTI BIBLIOGRAFICI:'); L.push('');
+  REFERENCES.forEach((r,i) => L.push(`[${i+1}] ${r}`));
+  return L;
+}
+function generateReport() {
+  if (reportManuallyEdited) return;
+  reportOutput.value = buildReportLines(true).join('\n');
+}
+document.getElementById('regenReportBtn').addEventListener('click', () => { reportManuallyEdited=false; generateReport(); });
+document.getElementById('copyReportBtn').addEventListener('click', () => {
+  reportOutput.select();
+  navigator.clipboard.writeText(reportOutput.value).catch(()=>document.execCommand('copy'));
+});
+document.getElementById('printReportBtn').addEventListener('click', () => { buildPrintView(); window.print(); });
+generateReport();
+
+// ============================================================
+// PRINT VIEW: text-left, maps-stacked-right column; faint-fade (not gray) for non-lit sectors
+// ============================================================
+function buildPrintView() {
+  const printArea = document.getElementById('printArea');
+  const rows = buildTableRows();
+  const litSectors = new Set(Object.keys(lesions).filter(id => (lesions[id]||[]).some(e => e.mode==='normal' && e.category)));
+
+  function isLitMatch(id) {
+    for (const sectorId of litSectors) {
+      const m = sectorId.match(AXIAL_SECTOR_RE);
+      if (!m) continue;
+      const [, level, zone, side] = m;
+      const macro = MACRO[zone];
+      const coronalPrefix = escapeRe(`coronal_${level}_${macro}`);
+      const sagittalPrefix = escapeRe(`sagittal_${level}_${macro}`);
+      const re = new RegExp(`^(${coronalPrefix}|${sagittalPrefix})(?:_p\\d+)?_${side}(?:_p\\d+)?$`);
+      if (re.test(id)) return true;
+    }
+    return false;
+  }
+
+  function forcePrintDecorative(clone, isSagittal) {
+    clone.querySelectorAll('[id]').forEach(el => {
+      const isSvP = isSagittal ? SV_ID_RE.sagittal.test(el.id) : SV_ID_RE.coronal.test(el.id);
+      if (isSvP) el.style.setProperty('fill', '#fffdfb', 'important');
+    });
+    clone.querySelectorAll('path').forEach(el => {
+      const id = el.id || '';
+      const isSector = isSagittal ? SECTOR_ID_RE.sagittal.test(id) : SECTOR_ID_RE.coronal.test(id);
+      const isSvP = isSagittal ? SV_ID_RE.sagittal.test(id) : SV_ID_RE.coronal.test(id);
+      if (!isSector && !isSvP && (isNearWhite(el) || isUnresolvedGradient(el))) {
+        el.style.setProperty('fill', '#ffffff', 'important');
+        el.style.setProperty('opacity', '1', 'important');
+      }
+    });
+  }
+  function cloneFaded(svgSelector, idTest, isSagittal) {
+    const svgEl = document.querySelector(svgSelector);
+    if (!svgEl) return '';
+    const clone = svgEl.cloneNode(true);
+    if (litSectors.size > 0) {
+      clone.querySelectorAll('[id]').forEach(el => {
+        if (idTest(el.id) && !isLitMatch(el.id)) el.style.setProperty('opacity', '0.22', 'important');
+      });
+    }
+    forcePrintDecorative(clone, isSagittal);
+    return clone.outerHTML;
+  }
+
+  const activeLevel = LEVEL_ORDER[currentIdx];
+  const axialSvg = document.querySelector(`#discLayers .disc-layer[data-level="${activeLevel}"] svg`);
+  const coronalHtml = cloneFaded('#coronalHolder svg', id => SECTOR_ID_RE.coronal.test(id), false);
+  const activeSide = document.querySelector('#sagittalHolder .sag-layer.active');
+  const sagittalHtml = activeSide ? cloneFaded(`#sagittalHolder .sag-layer[data-side="${activeSide.dataset.side}"] svg`, id => SECTOR_ID_RE.sagittal.test(id), true) : '';
+
+  let tableHtml = '';
+  if (rows.length) {
+    tableHtml = `<table><thead><tr><th>Lesion</th><th>Size</th><th>Site</th><th>Level</th><th>Dist.Apex</th><th>T2W</th><th>DWI</th><th>DCE</th><th>ADC</th><th>SD</th><th>Contact</th><th>Position</th><th>EPE</th><th>PI-RADS</th></tr></thead><tbody>` +
+      rows.map(r => `<tr><td>${r.n}</td><td>${r.size}</td><td>${r.site}</td><td>${r.level}</td><td>${r.distApex}</td><td>${r.t2w}</td><td>${r.dwi}</td><td>${r.dce}</td><td>${r.adc}</td><td>${r.sd}</td><td>${r.contact}</td><td>${r.position}</td><td>${r.epe}</td><td><b>${r.pirads}</b></td></tr>`).join('') +
+      `</tbody></table>`;
+  }
+
+  printArea.innerHTML = `
+    <div class="ph-header">
+      <div>${meta.institute?('<b>'+meta.institute+'</b>'):''}</div>
+      <div>${meta.patient?('<b>'+meta.patient+'</b><br>'):''}${meta.pid?('ID: '+meta.pid):''}</div>
+    </div>
+    <div class="ph-title">RM MULTIPARAMETRICA DELLA PROSTATA</div>
+    ${tableHtml}
+    <div class="ph-body">
+      <div class="ph-left">
+        <div class="ph-text">${(() => {
+          const lines = buildReportLines(false);
+          const startIdx = lines.findIndex(l => l.startsWith('INDICAZIONI:'));
+          return (startIdx>=0?lines.slice(startIdx):lines).join('\n').replace(/</g,'&lt;');
+        })()}</div>
+      </div>
+      <div class="ph-right">
+        ${axialSvg?`<figure class="ph-map-fig">${axialSvg.outerHTML}<figcaption>${LEVEL_NAMES[activeLevel]}</figcaption></figure>`:''}
+        ${coronalHtml?`<figure class="ph-map-fig">${coronalHtml}<figcaption>Coronale</figcaption></figure>`:''}
+        ${sagittalHtml?`<figure class="ph-map-fig">${sagittalHtml}<figcaption>Sagittale ${activeSide?activeSide.dataset.side:''}</figcaption></figure>`:''}
+      </div>
+    </div>
+  `;
 }
 </script>
