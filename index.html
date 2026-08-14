@@ -1350,6 +1350,15 @@ function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 // ============================================================
 // INITIAL COLOR / VISIBILITY PASS
 // ============================================================
+// give every real map SVG (not the temporary capture overlay) its own persistent drawings
+// group -- this way user-drawn shapes are literally part of the map, so they survive draw-mode
+// toggling and are automatically included whenever that SVG is cloned (e.g. for print).
+document.querySelectorAll('#discLayers .disc-layer svg, #coronalHolder svg, #sagittalHolder .sag-layer svg').forEach(svgEl => {
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('class', 'userDrawings');
+  svgEl.appendChild(g);
+});
+
 document.querySelectorAll('#root .disc-layer text, #root .svg-holder text').forEach(t => { t.style.pointerEvents = 'none'; });
 
 function isNearWhite(el) {
@@ -1969,7 +1978,13 @@ function gradientColorFor(entry) {
   const peak = entry.rangeMax || entry.category || 3;
   return CATEGORY_COLORS[peak] || '#e0752f';
 }
-function ensureGradient(defsEl, id, color) {
+function ensureGradient(svgEl, id, color) {
+  let defsEl = svgEl.querySelector('defs.userDrawingsDefs');
+  if (!defsEl) {
+    defsEl = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    defsEl.setAttribute('class', 'userDrawingsDefs');
+    svgEl.insertBefore(defsEl, svgEl.firstChild);
+  }
   let grad = defsEl.querySelector('#'+id);
   if (grad) grad.remove();
   grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
@@ -1979,27 +1994,10 @@ function ensureGradient(defsEl, id, color) {
   defsEl.appendChild(grad);
   return grad;
 }
-function renderDrawnShapes(panel) {
-  const P = PANELS[panel];
-  if (!P.svg) return;
-  const g = P.svg.querySelector('.drawShapesGroup');
-  g.innerHTML = '';
-  const currentLevel = LEVEL_ORDER[currentIdx];
-  const currentSagSide = document.querySelector('#sagittalHolder .sag-layer.active')?.dataset.side;
-  function maybeDraw(entry) {
-    if (!entry.drawings || !entry.drawings[panel]) return;
-    const rec = entry.drawings[panel];
-    if (panel === 'axial' && rec.level !== currentLevel) return;
-    if (panel === 'sagittal' && rec.side !== currentSagSide) return;
-    drawShapeRecord(rec, entry, P.defs, g);
-  }
-  Object.values(lesions).forEach(arr => arr.forEach(maybeDraw));
-  if (draft) maybeDraw(draft);
-}
-function drawShapeRecord(rec, entry, defsEl, g) {
+function drawShapeRecord(rec, entry, svgEl, g) {
   const gradId = 'grad_' + Math.random().toString(36).slice(2,9);
   const color = gradientColorFor(entry);
-  const grad = ensureGradient(defsEl, gradId, color);
+  const grad = ensureGradient(svgEl, gradId, color);
   grad.setAttribute('cx', rec.bounds.cx); grad.setAttribute('cy', rec.bounds.cy); grad.setAttribute('r', rec.bounds.r * 1.15);
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.setAttribute('d', rec.path);
@@ -2008,6 +2006,40 @@ function drawShapeRecord(rec, entry, defsEl, g) {
   path.setAttribute('stroke-width', '1.2');
   path.setAttribute('stroke-opacity', '0.7');
   g.appendChild(path);
+}
+
+// draws directly into the REAL map SVGs (not a separate overlay), so shapes persist regardless
+// of draw-mode toggling and are automatically present in print (which clones these same SVGs).
+function renderDrawnShapes(panel) {
+  if (panel === 'axial') {
+    LEVEL_ORDER.forEach(level => {
+      const svgEl = document.querySelector(`#discLayers .disc-layer[data-level="${level}"] svg`);
+      if (!svgEl) return;
+      const g = svgEl.querySelector('g.userDrawings');
+      g.innerHTML = '';
+      const draw = entry => { if (entry.drawings && entry.drawings.axial && entry.drawings.axial.level === level) drawShapeRecord(entry.drawings.axial, entry, svgEl, g); };
+      Object.values(lesions).forEach(arr => arr.forEach(draw));
+      if (draft) draw(draft);
+    });
+  } else if (panel === 'coronal') {
+    const svgEl = document.querySelector('#coronalHolder svg');
+    if (!svgEl) return;
+    const g = svgEl.querySelector('g.userDrawings');
+    g.innerHTML = '';
+    const draw = entry => { if (entry.drawings && entry.drawings.coronal) drawShapeRecord(entry.drawings.coronal, entry, svgEl, g); };
+    Object.values(lesions).forEach(arr => arr.forEach(draw));
+    if (draft) draw(draft);
+  } else if (panel === 'sagittal') {
+    ['R','L'].forEach(side => {
+      const svgEl = document.querySelector(`#sagittalHolder .sag-layer[data-side="${side}"] svg`);
+      if (!svgEl) return;
+      const g = svgEl.querySelector('g.userDrawings');
+      g.innerHTML = '';
+      const draw = entry => { if (entry.drawings && entry.drawings.sagittal && entry.drawings.sagittal.side === side) drawShapeRecord(entry.drawings.sagittal, entry, svgEl, g); };
+      Object.values(lesions).forEach(arr => arr.forEach(draw));
+      if (draft) draw(draft);
+    });
+  }
 }
 
 // ============================================================
@@ -2236,42 +2268,25 @@ function buildPrintView() {
       }
     });
   }
-  function mergeAnnotations(cloneSvgEl, panel) {
-    const P = PANELS[panel];
-    if (!P || !P.svg) return;
-    const shapesGroup = P.svg.querySelector('.drawShapesGroup');
-    const defsEl = P.svg.querySelector('defs');
-    if (shapesGroup && shapesGroup.children.length) {
-      if (defsEl && defsEl.children.length) cloneSvgEl.appendChild(defsEl.cloneNode(true));
-      cloneSvgEl.appendChild(shapesGroup.cloneNode(true));
-    }
-  }
-
-  function cloneFaded(svgSelector, idTest, isSagittal, panel) {
+  function cloneFaded(svgSelector, idTest, isSagittal) {
     const svgEl = document.querySelector(svgSelector);
     if (!svgEl) return '';
-    const clone = svgEl.cloneNode(true);
+    const clone = svgEl.cloneNode(true); // drawings are native children of svgEl now -- come along automatically
     if (litSectors.size > 0) {
       clone.querySelectorAll('[id]').forEach(el => {
         if (idTest(el.id) && !isLitMatch(el.id)) el.style.setProperty('opacity', '0.22', 'important');
       });
     }
     forcePrintDecorative(clone, isSagittal);
-    mergeAnnotations(clone, panel);
     return clone.outerHTML;
   }
 
   const activeLevel = LEVEL_ORDER[currentIdx];
   const axialSvgSource = document.querySelector(`#discLayers .disc-layer[data-level="${activeLevel}"] svg`);
-  let axialSvg = null;
-  if (axialSvgSource) {
-    const axialClone = axialSvgSource.cloneNode(true);
-    mergeAnnotations(axialClone, 'axial');
-    axialSvg = axialClone;
-  }
-  const coronalHtml = cloneFaded('#coronalHolder svg', id => SECTOR_ID_RE.coronal.test(id), false, 'coronal');
+  const axialSvg = axialSvgSource ? axialSvgSource.cloneNode(true) : null;
+  const coronalHtml = cloneFaded('#coronalHolder svg', id => SECTOR_ID_RE.coronal.test(id), false);
   const activeSide = document.querySelector('#sagittalHolder .sag-layer.active');
-  const sagittalHtml = activeSide ? cloneFaded(`#sagittalHolder .sag-layer[data-side="${activeSide.dataset.side}"] svg`, id => SECTOR_ID_RE.sagittal.test(id), true, 'sagittal') : '';
+  const sagittalHtml = activeSide ? cloneFaded(`#sagittalHolder .sag-layer[data-side="${activeSide.dataset.side}"] svg`, id => SECTOR_ID_RE.sagittal.test(id), true) : '';
 
   let tableHtml = '';
   if (rows.length) {
