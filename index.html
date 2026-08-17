@@ -346,7 +346,7 @@
   #root .range-thumb-filter {
     position:absolute; inset:0; z-index:0;
     backdrop-filter: blur(0.6px); -webkit-backdrop-filter: blur(0.6px);
-    filter: url(#liquidLens); opacity:0;
+    opacity:0;
   }
   #root .range-thumb-overlay { position:absolute; inset:0; z-index:1; background-color:rgba(255,255,255,.15); opacity:0; }
   #root .range-thumb-specular {
@@ -511,7 +511,6 @@
     left: var(--knob-left, 4px); width: var(--knob-width, 70px);
     background: linear-gradient(180deg, rgba(255,255,255,.6) 0%, rgba(255,255,255,.15) 45%, rgba(255,255,255,.28) 100%);
     backdrop-filter: blur(2px) saturate(160%); -webkit-backdrop-filter: blur(2px) saturate(160%);
-    filter: url(#liquidLens);
     box-shadow: 0 8px 16px -6px rgba(10,40,70,.35) inset;
     transition: left var(--transition, .62s) var(--ease-liquid), width var(--transition, .62s) var(--ease-liquid);
   }
@@ -2268,30 +2267,22 @@ function renderCreativeForm(group, side, level, zone) {
     html += `<label class="criteria-item ${checked?'checked':''}" data-crit="${n}"><input type="checkbox" value="${n}" ${checked?'checked':''}><span class="criteria-num">${n}</span><span>${desc}</span></label>`;
   });
   html += `</div>`;
-  const derivedMin = entry.selected.length ? Math.min(...entry.selected) : null;
-  const derivedMax = entry.selected.length ? Math.max(...entry.selected) : null;
-  // il valore mostrato/trascinabile e' l'affinamento manuale se presente, altrimenti quello
-  // derivato dai criteri selezionati -- cambiare i criteri azzera l'affinamento (vedi wireCreativeForm)
-  const minV = entry.manualMin != null ? entry.manualMin : derivedMin;
-  const maxV = entry.manualMax != null ? entry.manualMax : derivedMax;
+  const pos = getCreativePosition(entry); // null se nessun criterio selezionato
   const pct = v => ((v-1)/4)*100;
   html += `<div class="range-bar-wrap">
     <div class="range-track" id="rangeTrack">
-      <div class="range-fill" id="rangeFill" style="${minV?`left:${pct(minV)}%;width:${pct(maxV)-pct(minV)}%;`:'display:none;'}"></div>
-      <div class="range-thumb" id="rangeThumbMin" data-thumb="min" style="${minV?`left:${pct(minV)}%;`:'display:none;'}">
-        <div class="range-thumb-filter"></div><div class="range-thumb-overlay"></div><div class="range-thumb-specular"></div>
-      </div>
-      <div class="range-thumb" id="rangeThumbMax" data-thumb="max" style="${minV?`left:${pct(maxV)}%;`:'display:none;'}">
+      <div class="range-fill" id="rangeFill" style="${pos!=null?`left:0%;width:${pct(pos)}%;`:'display:none;'}"></div>
+      <div class="range-thumb" id="rangeThumb" style="${pos!=null?`left:${pct(pos)}%;`:'display:none;'}">
         <div class="range-thumb-filter"></div><div class="range-thumb-overlay"></div><div class="range-thumb-specular"></div>
       </div>
     </div>
-    <div class="range-ticks" id="rangeTicks">${[1,2,3,4,5].map(n=>`<span class="${minV&&n>=minV&&n<=maxV?'in-range':''}">${n}</span>`).join('')}</div>
-    <div class="range-label" id="rangeLabel">${minV ? `Range: <b>${minV}${minV!==maxV?'&ndash;'+maxV:''}</b>${(entry.manualMin!=null||entry.manualMax!=null)?' <span style="color:var(--text-dim);font-weight:400;">(affinato manualmente)</span>':''}` : 'Nessun criterio selezionato'}</div>
+    <div class="range-ticks" id="rangeTicks">${[1,2,3,4,5].map(n=>`<span class="${pos!=null&&Math.round(pos)===n?'in-range':''}">${n}</span>`).join('')}</div>
+    <div class="range-label" id="rangeLabel">${pos!=null ? creativePositionLabel(pos, entry.creativeManual) : 'Nessun criterio selezionato'}</div>
   </div>
   ${drawButtonsHtml(entry)}
   <div class="field"><label>Diametro massimo (mm)</label><input type="number" class="wide" id="sizeInputC" value="${entry.size||''}"></div>
-  <div class="creative-note">Modalita creativa: non calcola una categoria unica, mostra il range compatibile con i criteri selezionati. Trascina i due cursori per affinare manualmente entro il range; cambiare i criteri selezionati azzera l'affinamento.</div>
-  <button class="primary" id="saveLesionBtnC" ${minV?'':'disabled'}>${editingLesionId?'Aggiorna lesione':'Salva lesione'}</button>
+  <div class="creative-note">Modalita creativa: i criteri selezionati posizionano il cursore; trascinalo liberamente per affinare -- si assesta sulla posizione piu' vicina tra le 6 intermedie disponibili tra un PI-RADS e l'altro. Cambiare i criteri selezionati azzera l'affinamento manuale.</div>
+  <button class="primary" id="saveLesionBtnC" ${pos!=null?'':'disabled'}>${editingLesionId?'Aggiorna lesione':'Salva lesione'}</button>
   ${editingLesionId?'<button class="secondary" id="cancelEditBtnC">Annulla modifica</button>':''}`;
   return html;
 }
@@ -2304,7 +2295,7 @@ function wireCreativeForm(group) {
       entry.selected = entry.selected || [];
       if (cb.checked) { if (!entry.selected.includes(n)) entry.selected.push(n); }
       else { entry.selected = entry.selected.filter(x=>x!==n); }
-      entry.manualMin = null; entry.manualMax = null; // i criteri cambiano: si riparte dal valore derivato
+      entry.creativeManual = null; // i criteri cambiano: si riparte dalla posizione derivata
       renderScoringPanel();
     });
   });
@@ -2313,9 +2304,10 @@ function wireCreativeForm(group) {
   const saveBtn = document.getElementById('saveLesionBtnC');
   if (saveBtn) saveBtn.addEventListener('click', () => {
     if (!entry.selected || !entry.selected.length) return;
-    const derivedMin = Math.min(...entry.selected), derivedMax = Math.max(...entry.selected);
-    entry.rangeMin = entry.manualMin != null ? entry.manualMin : derivedMin;
-    entry.rangeMax = entry.manualMax != null ? entry.manualMax : derivedMax;
+    const pos = getCreativePosition(entry);
+    entry.creativePosition = pos;
+    entry.rangeMin = Math.floor(pos);
+    entry.rangeMax = Math.ceil(pos);
     if (!lesions[selectedId]) lesions[selectedId] = [];
     if (editingLesionId) {
       lesions[selectedId][lesions[selectedId].findIndex(e=>e.lesionId===editingLesionId)] = entry;
@@ -2328,57 +2320,81 @@ function wireCreativeForm(group) {
   if (cancelBtn) cancelBtn.addEventListener('click', () => { editingLesionId = null; renderScoringPanel(); });
 }
 
-// ---------------- cursori trascinabili sulla barra del range (modalita' creativa) ----------------
+// ---------------- cursore singolo con posizioni intermedie (modalita' creativa) ----------------
+// tra due PI-RADS adiacenti ci sono 6 posizioni intermedie equidistanti, oltre ai due estremi
+// interi: 8 posizioni totali per intervallo = 7 segmenti uguali. Su tutta la scala 1-5 (4
+// intervalli) questo da' 29 posizioni valide complessive (passo di 1/7).
+const CREATIVE_STEPS_PER_GAP = 7;
+function snapCreativeValue(raw) {
+  const clamped = Math.max(1, Math.min(5, raw));
+  const snapped = 1 + Math.round((clamped - 1) * CREATIVE_STEPS_PER_GAP) / CREATIVE_STEPS_PER_GAP;
+  return Math.round(snapped * 1000) / 1000; // ripulisce i residui in virgola mobile
+}
+function getCreativePosition(entry) {
+  if (!entry.selected || !entry.selected.length) return null;
+  if (entry.creativeManual != null) return entry.creativeManual;
+  const derivedMin = Math.min(...entry.selected), derivedMax = Math.max(...entry.selected);
+  return snapCreativeValue((derivedMin + derivedMax) / 2);
+}
+function creativePositionLabel(pos, isManual) {
+  const floorCat = Math.floor(pos), ceilCat = Math.ceil(pos);
+  const manualNote = isManual ? ' <span style="color:var(--text-dim);font-weight:400;">(affinato manualmente)</span>' : '';
+  if (floorCat === ceilCat) {
+    return `PI-RADS: <b>${floorCat}</b>${manualNote}`;
+  }
+  const frac = pos - floorCat; // 0..1 all'interno dell'intervallo
+  const closerTo = frac > 0.5 ? ceilCat : (frac < 0.5 ? floorCat : null);
+  const sideNote = closerTo ? `, pi\u00f9 vicino a ${closerTo}` : ', equidistante';
+  return `PI-RADS: <b>${floorCat}-${ceilCat}</b>${sideNote}${manualNote}`;
+}
 function wireRangeSlider(entry) {
   const track = document.getElementById('rangeTrack');
-  const thumbMin = document.getElementById('rangeThumbMin');
-  const thumbMax = document.getElementById('rangeThumbMax');
+  const thumb = document.getElementById('rangeThumb');
   const fill = document.getElementById('rangeFill');
   const ticks = document.getElementById('rangeTicks');
   const label = document.getElementById('rangeLabel');
-  if (!track || !entry.selected || !entry.selected.length) return; // niente da trascinare se non c'e' ancora un range
+  if (!track || !entry.selected || !entry.selected.length) return; // niente da trascinare se non c'e' ancora una posizione
 
-  const derivedMin = Math.min(...entry.selected), derivedMax = Math.max(...entry.selected);
   const pct = v => ((v-1)/4)*100;
 
-  function currentMin() { return entry.manualMin != null ? entry.manualMin : derivedMin; }
-  function currentMax() { return entry.manualMax != null ? entry.manualMax : derivedMax; }
-  function redraw() {
-    const mn = currentMin(), mx = currentMax();
-    thumbMin.style.left = pct(mn) + '%';
-    thumbMax.style.left = pct(mx) + '%';
-    fill.style.left = pct(mn) + '%';
-    fill.style.width = (pct(mx) - pct(mn)) + '%';
-    ticks.querySelectorAll('span').forEach((s,i) => s.classList.toggle('in-range', (i+1)>=mn && (i+1)<=mx));
-    const refined = entry.manualMin != null || entry.manualMax != null;
-    label.innerHTML = `Range: <b>${mn}${mn!==mx?'&ndash;'+mx:''}</b>${refined?' <span style="color:var(--text-dim);font-weight:400;">(affinato manualmente)</span>':''}`;
+  function redraw(pos) {
+    thumb.style.left = pct(pos) + '%';
+    fill.style.width = pct(pos) + '%';
+    ticks.querySelectorAll('span').forEach((s,i) => s.classList.toggle('in-range', Math.round(pos) === (i+1)));
+    label.innerHTML = creativePositionLabel(pos, entry.creativeManual != null);
   }
-  function valueFromClientX(clientX) {
+  function rawValueFromClientX(clientX) {
     const rect = track.getBoundingClientRect();
     let f = (clientX - rect.left) / rect.width;
     f = Math.max(0, Math.min(1, f));
-    return Math.round(f * 4) + 1; // 5 posizioni discrete: le categorie PI-RADS sono 1-5, non un continuo
+    return 1 + f * 4;
   }
-  function startDrag(thumb, which, evt) {
+  function startDrag(evt) {
     evt.preventDefault();
     thumb.classList.add('active');
     function onMove(e) {
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      let v = valueFromClientX(clientX);
-      if (which === 'min') { v = Math.min(v, currentMax()); entry.manualMin = v; }
-      else { v = Math.max(v, currentMin()); entry.manualMax = v; }
-      redraw();
+      // durante il trascinamento il movimento e' libero e continuo -- lo scatto alla
+      // posizione intermedia piu' vicina avviene solo al rilascio (onUp), non qui.
+      const raw = rawValueFromClientX(clientX);
+      thumb.style.left = pct(raw) + '%';
+      fill.style.width = pct(raw) + '%';
+      ticks.querySelectorAll('span').forEach((s,i) => s.classList.toggle('in-range', Math.round(raw) === (i+1)));
+      label.innerHTML = creativePositionLabel(raw, true);
     }
-    function onUp() {
+    function onUp(e) {
       thumb.classList.remove('active');
+      const clientX = (e.changedTouches ? e.changedTouches[0].clientX : e.clientX) ?? null;
+      const raw = clientX != null ? rawValueFromClientX(clientX) : entry.creativeManual;
+      entry.creativeManual = snapCreativeValue(raw);
+      redraw(entry.creativeManual);
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
     }
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', onUp);
   }
-  thumbMin.addEventListener('pointerdown', e => startDrag(thumbMin, 'min', e));
-  thumbMax.addEventListener('pointerdown', e => startDrag(thumbMax, 'max', e));
+  thumb.addEventListener('pointerdown', startDrag);
 }
 
 // ---------------- shared: lesion list + drawing buttons ----------------
