@@ -211,6 +211,9 @@
     background: radial-gradient(closest-side, rgba(255,255,255,.85), rgba(255,255,255,0) 75%);
     filter: blur(1px); mix-blend-mode: screen;
   }
+  /* tolto solo sui toggle di "ulteriori rilievi": con 5 istanze impilate il riflesso ripetuto
+     risultava eccessivo -- DCE e contatto capsula lo mantengono. */
+  #root .zone-toggle-exam .zone-toggle-glass::after { display: none; }
   #root .zone-toggle button { position:relative; z-index:2; flex:1; padding:6px; font-size:10.5px; border-radius:999px; border:none; background:transparent; color:var(--text-dim); cursor:pointer; transition:color .3s ease; }
   #root .zone-toggle button.active { color:#fff; font-weight:600; }
   #root .exam-detail { display:flex; gap:6px; margin-top:5px; }
@@ -2670,11 +2673,62 @@ toggleResizeObserver.observe(toggleEl);
 if (document.fonts && document.fonts.ready) { document.fonts.ready.then(updateModeButtons); }
 
 // ============================================================
-// GLASS DROPDOWN: avvolge una <select> nativa con un trigger + pannello "a bolla"
-// personalizzati, mantenendo la select nascosta ma funzionante -- dispatcha un normale evento
-// 'change', quindi ogni logica a valle resta identica a una select nativa.
+// GLASS DROPDOWN -- riscritto da zero.
+//
+// Principi:
+// 1. Un solo registro condiviso di istanze, un solo ascoltatore per ciascun tipo di evento
+//    (click/scroll/resize) su document/window -- MAI uno per istanza. Il pannello di scoring si
+//    ricostruisce ad ogni modifica, quindi ogni select viene ricreata di continuo: registrare un
+//    listener nuovo ad ogni ricostruzione senza mai togliere i vecchi accumula ascoltatori
+//    orfani indefinitamente.
+// 2. La pulizia delle istanze non piu' collegate al documento avviene DENTRO gli ascoltatori
+//    condivisi stessi (non in un punto esterno da richiamare a mano) -- cosi' non dipende dal
+//    ricordarsi di chiamarla nel posto giusto ogni volta che qualcosa ricostruisce il DOM.
+// 3. Aprire un menu chiude esplicitamente tutti gli altri (non ci si affida alla sola
+//    propagazione del click, che puo' essere interrotta da stopPropagation sul pulsante).
+// 4. Il pannello vive in document.body, posizionato con coordinate reali (position:fixed),
+//    per non essere mai tagliato dall'overflow:hidden dei pannelli di vetro.
 // ============================================================
+const bubbleDropdownRegistry = [];
+
+function pruneDropdownRegistry() {
+  for (let i = bubbleDropdownRegistry.length - 1; i >= 0; i--) {
+    const inst = bubbleDropdownRegistry[i];
+    if (!inst.wrap.isConnected) {
+      inst.listWrap.remove();
+      bubbleDropdownRegistry.splice(i, 1);
+    }
+  }
+}
+function closeAllBubbleDropdowns(except) {
+  bubbleDropdownRegistry.forEach(inst => {
+    if (inst === except) return;
+    inst.close();
+  });
+}
+
+// ascoltatori globali, registrati UNA SOLA VOLTA per l'intera pagina
+document.addEventListener('click', e => {
+  pruneDropdownRegistry();
+  bubbleDropdownRegistry.forEach(inst => {
+    if (!inst.wrap.contains(e.target) && !inst.listWrap.contains(e.target)) inst.close();
+  });
+});
+window.addEventListener('scroll', () => {
+  pruneDropdownRegistry();
+  bubbleDropdownRegistry.forEach(inst => { if (inst.isOpen()) inst.close(); });
+}, true);
+window.addEventListener('resize', () => {
+  pruneDropdownRegistry();
+  bubbleDropdownRegistry.forEach(inst => { if (inst.isOpen()) inst.reposition(); });
+});
+
+// avvolge una <select> nativa con un trigger + pannello "a bolla" personalizzati, mantenendo la
+// select nascosta ma funzionante -- dispatcha un normale evento 'change', quindi ogni logica a
+// valle (calcolo categoria, aggiornamento referto) resta identica a una select nativa.
 function enhanceSelectAsBubbleDropdown(selectEl) {
+  pruneDropdownRegistry(); // occasione comoda e a costo zero per ripulire prima di aggiungerne un'altra
+
   const wrap = document.createElement('div');
   wrap.className = 'bubble-select-wrap';
   selectEl.parentNode.insertBefore(wrap, selectEl);
@@ -2691,17 +2745,18 @@ function enhanceSelectAsBubbleDropdown(selectEl) {
   trigger.appendChild(chevron);
   wrap.appendChild(trigger);
 
-  // il pannello va su document.body (non dentro wrap) per non essere mai tagliato
-  // dall'overflow:hidden dei pannelli di vetro -- la posizione si calcola dalle
-  // coordinate reali del trigger ogni volta che si apre.
   const listWrap = document.createElement('div');
   listWrap.className = 'bubble-select-list-wrap';
   const list = document.createElement('div');
   list.className = 'bubble-select-list';
   listWrap.appendChild(list);
-  document.body.appendChild(listWrap);
+  // dentro #root (non document.body): tutto lo stile del tool e' scoping sotto #root, quindi
+  // fuori da li' il pannello apparirebbe come testo grezzo senza alcun CSS applicato. #root
+  // stesso non ha overflow:hidden (solo i pannelli interni ce l'hanno), quindi il pannello
+  // resta comunque libero dal taglio che causava il problema di EPE.
+  root.appendChild(listWrap);
 
-  function positionList() {
+  function reposition() {
     const r = trigger.getBoundingClientRect();
     listWrap.style.left = r.left + 'px';
     listWrap.style.top = (r.bottom + 8) + 'px';
@@ -2714,14 +2769,14 @@ function enhanceSelectAsBubbleDropdown(selectEl) {
       item.className = 'bubble-select-option' + (opt.value === selectEl.value ? ' selected' : '');
       item.textContent = opt.textContent;
       item.addEventListener('click', () => {
-        // segna la selezione subito, a lista ancora aperta: la tinta si vede dissolvere
-        // sull'opzione scelta prima che il pannello si ritiri, invece di sparire di scatto.
+        // segna la selezione subito, a pannello ancora aperto: la tinta si vede dissolvere
+        // sull'opzione scelta prima che si ritiri, invece di sparire di scatto insieme al resto.
         list.querySelectorAll('.bubble-select-option.selected').forEach(el => el.classList.remove('selected'));
         item.classList.add('selected');
         selectEl.value = opt.value;
         syncTriggerLabel();
         setTimeout(() => {
-          closeList();
+          close();
           setTimeout(() => { selectEl.dispatchEvent(new Event('change', { bubbles: true })); }, 420);
         }, 380);
       });
@@ -2732,17 +2787,26 @@ function enhanceSelectAsBubbleDropdown(selectEl) {
     const sel = selectEl.options[selectEl.selectedIndex];
     triggerLabel.textContent = sel ? sel.textContent : '';
   }
-  function openList() { buildOptions(); positionList(); listWrap.classList.add('open'); trigger.classList.add('open'); wrap.classList.add('open'); }
-  function closeList() { listWrap.classList.remove('open'); trigger.classList.remove('open'); wrap.classList.remove('open'); }
+  function isOpen() { return listWrap.classList.contains('open'); }
+  function open() {
+    if (isOpen()) return;
+    closeAllBubbleDropdowns(instance);
+    buildOptions();
+    reposition();
+    listWrap.classList.add('open'); trigger.classList.add('open'); wrap.classList.add('open');
+  }
+  function close() {
+    if (!isOpen()) return;
+    listWrap.classList.remove('open'); trigger.classList.remove('open'); wrap.classList.remove('open');
+  }
 
   trigger.addEventListener('click', e => {
     e.stopPropagation();
-    if (listWrap.classList.contains('open')) closeList(); else openList();
+    if (isOpen()) close(); else open();
   });
-  document.addEventListener('click', e => { if (!wrap.contains(e.target) && !listWrap.contains(e.target)) closeList(); });
-  window.addEventListener('scroll', () => { if (listWrap.classList.contains('open')) closeList(); }, true);
-  window.addEventListener('resize', () => { if (listWrap.classList.contains('open')) positionList(); });
 
+  const instance = { wrap, listWrap, isOpen, close, reposition };
+  bubbleDropdownRegistry.push(instance);
   syncTriggerLabel();
 }
 
@@ -2791,7 +2855,7 @@ const EXAM_FIELDS = [
 ];
 examFieldsHolder.innerHTML = EXAM_FIELDS.map(f => `<div class="meta-field">
     <div class="exam-row-title">${f.label}</div>
-    <div class="zone-toggle"><div class="zone-toggle-knob"></div><div class="zone-toggle-glass"></div>
+    <div class="zone-toggle zone-toggle-exam"><div class="zone-toggle-knob"></div><div class="zone-toggle-glass"></div>
       <button data-exam="${f.key}" data-val="${f.off}" class="exam-toggle active">${f.offL}</button>
       <button data-exam="${f.key}" data-val="${f.on}" class="exam-toggle">${f.onL}</button>
     </div>
