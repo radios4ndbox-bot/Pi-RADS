@@ -211,12 +211,12 @@
   #root .panel-modal-close { font-size:11.5px; padding:7px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.6); background:rgba(255,255,255,.5); color:var(--text-dim); cursor:pointer; }
   #root .panel-modal-body { overflow:auto; }
   #root .panel-modal-body .draw-wrap { max-width:520px; margin:0 auto; }
-  @media (max-width: 1000px) { #root .below-zone { grid-template-columns: 1fr; } }
 
   /* ============================================================
-     BELOW ZONE: META PANELS
+     BELOW ZONE: single column, thematically ordered (Dati Refertazione ->
+     Scoring -> Ulteriori rilievi -> Referto strutturato)
      ============================================================ */
-  #root .below-zone { display:grid; grid-template-columns: 340px 1fr; gap:16px; align-items:start; }
+  #root .below-zone { display:flex; flex-direction:column; gap:16px; max-width:760px; margin:0 auto; }
   #root .meta-panel { background:var(--glass-bg); backdrop-filter:blur(18px) saturate(160%); -webkit-backdrop-filter:blur(18px) saturate(160%); border:1px solid var(--glass-border); box-shadow:var(--glass-shadow); border-radius:18px; padding:16px; margin-bottom:14px; }
   #root .meta-panel-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
   #root .meta-panel-head h2 { margin:0; }
@@ -716,80 +716,77 @@ root.innerHTML = `
     </div>
 
     <div class="below-zone">
-      <div>
-        <div class="meta-panel">
-          <div class="meta-panel-head">
-            <h2>Dati esame</h2>
-            <div class="cronologia-actions">
-              <div class="cron-dropdown-wrap">
-                <button type="button" class="cron-btn" id="rememberBtn">&#128190; Ricordami</button>
-                <div class="cron-popover" id="rememberPopover">
-                  <input type="text" id="rememberNameInput" placeholder="Nome salvataggio (es. IEO Milano)">
-                  <button type="button" class="cron-popover-confirm" id="rememberConfirmBtn">Salva</button>
-                </div>
-              </div>
-              <div class="cron-dropdown-wrap">
-                <button type="button" class="cron-btn" id="cronologiaBtn">&#128337; Cronologia</button>
-                <div class="cron-popover cron-list" id="cronologiaList"></div>
+      <div class="meta-panel">
+        <div class="meta-panel-head">
+          <h2>Dati Refertazione</h2>
+          <div class="cronologia-actions">
+            <div class="cron-dropdown-wrap">
+              <button type="button" class="cron-btn" id="rememberBtn">&#128190; Ricordami</button>
+              <div class="cron-popover" id="rememberPopover">
+                <input type="text" id="rememberNameInput" placeholder="Nome salvataggio (es. IEO Milano)">
+                <button type="button" class="cron-popover-confirm" id="rememberConfirmBtn">Salva</button>
               </div>
             </div>
-          </div>
-          <div class="meta-field"><label>Istituto</label><input type="text" id="metaInstitute"></div>
-          <div class="meta-field row">
-            <div style="flex:2"><label>Paziente</label><input type="text" id="metaPatient"></div>
-            <div style="flex:1"><label>ID</label><input type="text" id="metaPid"></div>
-          </div>
-          <div class="meta-field">
-            <label>Indicazione clinica</label>
-            <div class="indication-chips">
-              <button type="button" class="indication-chip" data-indication="Staging">Staging</button>
-              <button type="button" class="indication-chip" data-indication="Detection">Detection</button>
-              <button type="button" class="indication-chip" data-indication="Sorveglianza">Sorveglianza</button>
+            <div class="cron-dropdown-wrap">
+              <button type="button" class="cron-btn" id="cronologiaBtn">&#128337; Cronologia</button>
+              <div class="cron-popover cron-list" id="cronologiaList"></div>
             </div>
-            <input type="text" id="metaIndication">
           </div>
-          <div class="meta-field row">
-            <div><label>PSA (ng/ml)</label><input type="number" step="0.1" id="metaPsa"></div>
-            <div><label>Dose mdc (mL)</label><input type="number" id="metaMdc"></div>
-          </div>
-          <div class="meta-field row">
-            <div><label>AP (mm)</label><input type="number" id="metaAp"></div>
-            <div><label>LR (mm)</label><input type="number" id="metaLr"></div>
-            <div><label>CC (mm)</label><input type="number" id="metaCc"></div>
-          </div>
-          <div class="readout-value" id="metaReadout">-- cc &middot; -- ng/ml/cc</div>
         </div>
-
-        <div class="meta-panel">
-          <h2>Refertazione</h2>
-          <div class="meta-field row">
-            <div><label>Medico refertante</label><input type="text" id="metaPhysician"></div>
-            <div><label>T.S.R.M.</label><input type="text" id="metaTsrm"></div>
+        <div class="meta-field"><label>Istituto</label><input type="text" id="metaInstitute"></div>
+        <div class="meta-field row">
+          <div style="flex:2"><label>Paziente</label><input type="text" id="metaPatient"></div>
+          <div style="flex:1"><label>ID</label><input type="text" id="metaPid"></div>
+        </div>
+        <div class="meta-field">
+          <label>Indicazione clinica</label>
+          <div class="indication-chips">
+            <button type="button" class="indication-chip" data-indication="Staging">Staging</button>
+            <button type="button" class="indication-chip" data-indication="Detection">Detection</button>
+            <button type="button" class="indication-chip" data-indication="Sorveglianza">Sorveglianza</button>
           </div>
-          <div class="meta-field"><label>Tecnica (modificabile)</label><textarea id="metaTecnica" rows="5" style="font-size:11px;line-height:1.4;"></textarea></div>
+          <input type="text" id="metaIndication">
         </div>
-
-        <div class="meta-panel" id="examFindingsPanel">
-          <h2>Ulteriori rilievi</h2>
-          <div id="examFieldsHolder"></div>
+        <div class="meta-field row">
+          <div><label>PSA (ng/ml)</label><input type="number" step="0.1" id="metaPsa"></div>
+          <div><label>Dose mdc (mL)</label><input type="number" id="metaMdc"></div>
         </div>
+        <div class="meta-field row">
+          <div><label>AP (mm)</label><input type="number" id="metaAp"></div>
+          <div><label>LR (mm)</label><input type="number" id="metaLr"></div>
+          <div><label>CC (mm)</label><input type="number" id="metaCc"></div>
+        </div>
+        <div class="readout-value" id="metaReadout">-- cc &middot; -- ng/ml/cc</div>
+        <div class="meta-field row" style="margin-top:10px;">
+          <div><label>Medico refertante</label><input type="text" id="metaPhysician"></div>
+          <div><label>T.S.R.M.</label><input type="text" id="metaTsrm"></div>
+        </div>
+        <div class="meta-field"><label>Tecnica (modificabile)</label><textarea id="metaTecnica" rows="5" style="font-size:11px;line-height:1.4;"></textarea></div>
       </div>
 
-      <div>
-        <div class="scoring-panel" id="scoringPanel">
-          <div class="placeholder-msg">Clicca un settore sulla mappa assiale per iniziare lo scoring.</div>
-        </div>
-        <div class="report-section">
-          <div class="report-head">
-            <h2 style="margin:0">Referto strutturato</h2>
-            <div style="display:flex;gap:6px;">
-              <button class="secondary" id="regenReportBtn" style="width:auto;margin-top:0;padding:6px 12px;">Rigenera</button>
-              <button class="secondary" id="copyReportBtn" style="width:auto;margin-top:0;padding:6px 12px;">Copia</button>
-              <button class="primary" id="printReportBtn" style="width:auto;margin-top:0;padding:6px 12px;">Stampa</button>
+      <div class="scoring-panel" id="scoringPanel">
+        <div class="placeholder-msg">Clicca un settore sulla mappa assiale per iniziare lo scoring.</div>
+      </div>
+
+      <div class="meta-panel" id="examFindingsPanel">
+        <h2>Ulteriori rilievi</h2>
+        <div id="examFieldsHolder"></div>
+      </div>
+
+      <div class="report-section">
+        <div class="report-head">
+          <h2 style="margin:0">Referto strutturato</h2>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <div class="zone-toggle" id="reportModeToggle"><div class="zone-toggle-knob"></div><div class="zone-toggle-glass"></div>
+              <button data-reportmode="pdf" class="active">Modalit&agrave; PDF</button>
+              <button data-reportmode="pacs">Modalit&agrave; PACS</button>
             </div>
+            <button class="secondary" id="regenReportBtn" style="width:auto;margin-top:0;padding:6px 12px;">Rigenera</button>
+            <button class="secondary" id="copyReportBtn" style="width:auto;margin-top:0;padding:6px 12px;">Copia</button>
+            <button class="primary" id="printReportBtn" style="width:auto;margin-top:0;padding:6px 12px;">Stampa</button>
           </div>
-          <textarea id="reportOutput" class="report-textarea"></textarea>
         </div>
+        <textarea id="reportOutput" class="report-textarea"></textarea>
       </div>
     </div>
 
@@ -2768,20 +2765,20 @@ function ensureGradient(svgEl, id, color) {
   defsEl.appendChild(grad);
   return grad;
 }
+function ellipseAsPathD(cx, cy, rx, ry) {
+  // due archi di 180 gradi che insieme formano un'ellisse completa -- un <path> equivalente
+  // a <ellipse cx cy rx ry>, usato apposta invece dell'elemento nativo perche' i gradienti su
+  // <ellipse> a volte non sopravvivono alla stampa/generazione PDF in alcuni browser, mentre
+  // su <path> sono affidabili (stessa tipologia di elemento usata dallo strumento penna).
+  return `M ${(cx-rx).toFixed(2)},${cy.toFixed(2)} A ${rx.toFixed(2)},${ry.toFixed(2)} 0 1,0 ${(cx+rx).toFixed(2)},${cy.toFixed(2)} A ${rx.toFixed(2)},${ry.toFixed(2)} 0 1,0 ${(cx-rx).toFixed(2)},${cy.toFixed(2)} Z`;
+}
 function drawShapeRecord(rec, entry, svgEl, g) {
   const gradId = 'grad_' + Math.random().toString(36).slice(2,9);
   const color = gradientColorFor(entry);
   const grad = ensureGradient(svgEl, gradId, color);
   grad.setAttribute('cx', rec.bounds.cx); grad.setAttribute('cy', rec.bounds.cy); grad.setAttribute('r', rec.bounds.r * 1.15);
-  let shape;
-  if (rec.type === 'ellipse') {
-    shape = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
-    shape.setAttribute('cx', rec.cx); shape.setAttribute('cy', rec.cy);
-    shape.setAttribute('rx', rec.rx); shape.setAttribute('ry', rec.ry);
-  } else {
-    shape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    shape.setAttribute('d', rec.path);
-  }
+  const shape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  shape.setAttribute('d', rec.type === 'ellipse' ? ellipseAsPathD(rec.cx, rec.cy, rec.rx, rec.ry) : rec.path);
   shape.setAttribute('fill', `url(#${gradId})`);
   shape.setAttribute('stroke', color);
   shape.setAttribute('stroke-width', '1.2');
@@ -3227,9 +3224,9 @@ function savePresets(list) {
   try { localStorage.setItem('structrad_presets', JSON.stringify(list)); }
   catch (e) { /* localStorage non disponibile -- Cronologia non persiste in questa sessione */ }
 }
-function addPreset(name, institute, indication) {
+function addPreset(name, institute, indication, physician, tsrm) {
   const list = loadPresets();
-  list.unshift({ name, institute, indication, savedAt: Date.now() });
+  list.unshift({ name, institute, indication, physician, tsrm, savedAt: Date.now() });
   savePresets(list.slice(0, 30));
 }
 function removePreset(idx) {
@@ -3258,7 +3255,7 @@ rememberBtn.addEventListener('click', e => {
 rememberConfirmBtn.addEventListener('click', () => {
   const name = rememberNameInput.value.trim();
   if (!name) { rememberNameInput.focus(); return; }
-  addPreset(name, meta.institute || '', meta.indication || '');
+  addPreset(name, meta.institute || '', meta.indication || '', meta.physician || '', meta.tsrm || '');
   closeAllCronPopovers();
 });
 rememberNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') rememberConfirmBtn.click(); });
@@ -3270,7 +3267,7 @@ function renderCronologiaList() {
     <div class="cron-list-item" data-idx="${i}">
       <div>
         <div class="cron-list-item-name">${p.name}</div>
-        <div class="cron-list-item-detail">${[p.institute, p.indication].filter(Boolean).join(' \u00b7 ') || '&mdash;'}</div>
+        <div class="cron-list-item-detail">${[p.institute, p.indication, p.physician].filter(Boolean).join(' \u00b7 ') || '&mdash;'}</div>
       </div>
       <span class="cron-list-remove" data-remove-idx="${i}">&times;</span>
     </div>`).join('');
@@ -3280,8 +3277,12 @@ function renderCronologiaList() {
       const p = list[Number(item.dataset.idx)];
       const instField = document.getElementById('metaInstitute');
       const indField = document.getElementById('metaIndication');
+      const physField = document.getElementById('metaPhysician');
+      const tsrmField = document.getElementById('metaTsrm');
       instField.value = p.institute || ''; instField.dispatchEvent(new Event('input', { bubbles: true }));
       indField.value = p.indication || ''; indField.dispatchEvent(new Event('input', { bubbles: true }));
+      if (p.physician) { physField.value = p.physician; physField.dispatchEvent(new Event('input', { bubbles: true })); }
+      if (p.tsrm) { tsrmField.value = p.tsrm; tsrmField.dispatchEvent(new Event('input', { bubbles: true })); }
       closeAllCronPopovers();
     });
   });
@@ -3322,20 +3323,26 @@ let reportManuallyEdited = false;
 reportOutput.addEventListener('input', () => { reportManuallyEdited = true; });
 
 function buildTableRows() {
-  const entries = allLesionsFlat().filter(e => e.mode==='normal' && e.category).sort((a,b)=>b.category-a.category);
+  const entries = allLesionsFlat()
+    .filter(e => (e.mode==='normal' && e.category) || (e.mode==='creative' && e.rangeMin != null))
+    .sort((a,b) => entryScore(b) - entryScore(a));
   return entries.map((e,i) => ({
     n: i+1, size: e.size || '', site: e.group, level: LEVEL_NAMES[e.level],
     distApex: e.distApex!=null ? e.distApex+' mm' : '',
-    t2w: e.group==='PZ' ? (e.t2Correlate||'') : e.t2,
-    dwi: e.dwi || '', dce: e.group==='PZ' ? (e.dce==='yes'?1:e.dce==='no'?0:'') : '',
+    t2w: e.mode==='normal' ? (e.group==='PZ' ? (e.t2Correlate||'') : e.t2) : '',
+    dwi: e.mode==='normal' ? (e.dwi || '') : '',
+    dce: e.mode==='normal' && e.group==='PZ' ? (e.dce==='yes'?1:e.dce==='no'?0:'') : '',
     adc: e.adc!=null?e.adc:'', sd: e.sd!=null?e.sd:'',
-    contact: e.contactCapsule==='yes'?'yes':e.contactCapsule==='no'?'no':'',
+    contact: e.mode==='normal' ? (e.contactCapsule==='yes'?'yes':e.contactCapsule==='no'?'no':'') : '',
     position: `${POSITION_PHRASE[e.zone]||''} ${ZONE_ORIGIN_LABEL_ABBR[e.side]}`,
-    epe: e.epe || '', pirads: e.category, _entry: e,
+    epe: e.mode==='normal' ? (e.epe || '') : '',
+    pirads: e.mode==='normal' ? e.category : (e.rangeMin===e.rangeMax ? `${e.rangeMin}` : `${e.rangeMin}-${e.rangeMax}`),
+    _entry: e,
   }));
 }
 
-function buildReportLines(includeTable) {
+function buildReportLines(includeTable, tableStyle) {
+  tableStyle = tableStyle || 'pipe'; // 'pipe' (PDF/testo) | 'list' (PACS)
   const rows = buildTableRows();
   const { volume, density } = computeVolumeDensity();
   let L = [];
@@ -3350,9 +3357,27 @@ function buildReportLines(includeTable) {
     L.push('');
   }
   if (includeTable && rows.length > 0) {
-    L.push('Lesion | Size | Site | Level | Dist.Apex | T2W | DWI | DCE | ADC | SD | Contact | Position | EPE | PI-RADS');
-    rows.forEach(r => L.push(`${r.n} | ${r.size} | ${r.site} | ${r.level} | ${r.distApex} | ${r.t2w} | ${r.dwi} | ${r.dce} | ${r.adc} | ${r.sd} | ${r.contact} | ${r.position} | ${r.epe} | ${r.pirads}`));
-    L.push('');
+    if (tableStyle === 'list') {
+      // PACS non riconosce tabelle/testo a colonne allineate: elenco leggibile riga per riga
+      L.push('LESIONI:');
+      rows.forEach(r => {
+        L.push(`Lesione ${r.n} -- PI-RADS ${r.pirads}`);
+        L.push(`  Sede: ${r.site} ${r.position}, livello ${r.level}`);
+        L.push(`  Dimensione: ${r.size||'--'} mm, distanza apice: ${r.distApex||'--'}`);
+        if (r._entry.mode === 'normal') {
+          L.push(`  T2W: ${r.t2w||'--'}, DWI: ${r.dwi||'--'}, DCE: ${r.dce!==''?(r.dce?'positiva':'negativa'):'--'}`);
+          L.push(`  ADC: ${r.adc||'--'}, SD: ${r.sd||'--'}`);
+          L.push(`  Contatto capsula: ${r.contact==='yes'?'si':r.contact==='no'?'no':'--'}, EPE: ${r.epe||'--'}`);
+        } else {
+          L.push(`  Valutazione in modalita creativa (range PI-RADS ${r.pirads})`);
+        }
+        L.push('');
+      });
+    } else {
+      L.push('Lesion | Size | Site | Level | Dist.Apex | T2W | DWI | DCE | ADC | SD | Contact | Position | EPE | PI-RADS');
+      rows.forEach(r => L.push(`${r.n} | ${r.size} | ${r.site} | ${r.level} | ${r.distApex} | ${r.t2w} | ${r.dwi} | ${r.dce} | ${r.adc} | ${r.sd} | ${r.contact} | ${r.position} | ${r.epe} | ${r.pirads}`));
+      L.push('');
+    }
   }
   L.push('TECNICA:'); L.push(meta.tecnica); L.push('');
   L.push('OSSERVAZIONI:');
@@ -3362,12 +3387,19 @@ function buildReportLines(includeTable) {
   rows.forEach(r => {
     const e = r._entry;
     L.push(`LESIONE PROSTATA ${r.n}:`);
-    const zoneLabel = e.group==='PZ' ? 'zona periferica' : 'zona di transizione';
-    L.push(`Nella ${zoneLabel} ${ZONE_ORIGIN_LABEL[e.side]}, a livello ${LEVEL_NAMES[e.level].toLowerCase()}, e evidente un'alterazione, nel contesto della quale e ${LIKELIHOOD_PHRASE[e.category]||'--'} la presenza di malattia clinicamente significativa (PI-RADS ${e.category}).`);
-    if (e.contactCapsule === 'yes') {
-      L.push(`La lesione descritta giunge a contatto con il versante ${POSITION_PHRASE[e.zone]||''} ${ZONE_ORIGIN_LABEL[e.side]} della capsula prostatica${e.epe?` con estensione extraprostatica ${EPE_PHRASE[e.epe]||'--'} (EPE Score ${e.epe})`:''}.`);
-    } else if (e.contactCapsule === 'no') {
-      L.push('La lesione descritta non giunge a contatto con la capsula prostatica.');
+    const zoneLabel = e.group==='PZ' ? 'zona periferica' : (e.group==='AFS' ? 'stroma fibromuscolare anteriore' : 'zona di transizione');
+    if (e.mode === 'normal') {
+      L.push(`Nella ${zoneLabel} ${ZONE_ORIGIN_LABEL[e.side]}, a livello ${LEVEL_NAMES[e.level].toLowerCase()}, e evidente un'alterazione, nel contesto della quale e ${LIKELIHOOD_PHRASE[e.category]||'--'} la presenza di malattia clinicamente significativa (PI-RADS ${e.category}).`);
+      if (e.contactCapsule === 'yes') {
+        L.push(`La lesione descritta giunge a contatto con il versante ${POSITION_PHRASE[e.zone]||''} ${ZONE_ORIGIN_LABEL[e.side]} della capsula prostatica${e.epe?` con estensione extraprostatica ${EPE_PHRASE[e.epe]||'--'} (EPE Score ${e.epe})`:''}.`);
+      } else if (e.contactCapsule === 'no') {
+        L.push('La lesione descritta non giunge a contatto con la capsula prostatica.');
+      }
+    } else {
+      // modalita creativa: nessuna categoria unica, si riporta il range con l'indicazione di
+      // quale estremo e' piu' vicino (stessa logica mostrata nel pannello di scoring)
+      const rangeTxt = e.rangeMin===e.rangeMax ? `PI-RADS ${e.rangeMin}` : `PI-RADS ${e.rangeMin}-${e.rangeMax}`;
+      L.push(`Nella ${zoneLabel} ${ZONE_ORIGIN_LABEL[e.side]}, a livello ${LEVEL_NAMES[e.level].toLowerCase()}, e evidente un'alterazione valutata in modalita creativa, con caratteristiche compatibili con un range di ${rangeTxt}.`);
     }
     L.push('');
   });
@@ -3394,8 +3426,18 @@ function buildReportLines(includeTable) {
 }
 function generateReport() {
   if (reportManuallyEdited) return;
-  reportOutput.value = buildReportLines(true).join('\n');
+  reportOutput.value = buildReportLines(true, reportOutputMode).join('\n');
 }
+let reportOutputMode = 'pdf'; // 'pdf' | 'pacs'
+document.querySelectorAll('#reportModeToggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    reportOutputMode = btn.dataset.reportmode;
+    updateToggleInPlace(btn);
+    reportManuallyEdited = false; // il cambio di modalita' rigenera sempre, sovrascrivendo eventuali modifiche manuali
+    generateReport();
+  });
+});
+syncZoneToggleKnobs(document.getElementById('reportModeToggle'), true);
 document.getElementById('regenReportBtn').addEventListener('click', () => { reportManuallyEdited=false; generateReport(); });
 document.getElementById('copyReportBtn').addEventListener('click', () => {
   reportOutput.select();
