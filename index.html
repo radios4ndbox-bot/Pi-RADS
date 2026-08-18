@@ -524,6 +524,12 @@
     opacity:0; transition: opacity 1.6s cubic-bezier(.22,.61,.36,1);
   }
   #root .mode-toggle[data-mode="creative"] .knob-tint { opacity:1; }
+  /* stesso toggle liquid-glass di Normale/Creativa, ma in tono azzurro invece che viola quando
+     passa a modalita' PACS */
+  #root #reportModeToggle .knob-tint {
+    background: linear-gradient(160deg, rgba(120,190,240,.2) 0%, rgba(100,175,235,.17) 30%, rgba(80,160,228,.15) 55%, rgba(65,148,220,.16) 78%, rgba(55,138,210,.19) 100%);
+  }
+  #root #reportModeToggle[data-mode="pacs"] .knob-tint { opacity:1; }
   #root .knob-glass::after {
     content:''; position:absolute; top:8%; left:12%; width:40%; height:30%; border-radius:999px;
     background: radial-gradient(closest-side, rgba(255,255,255,.85), rgba(255,255,255,0) 75%);
@@ -777,12 +783,17 @@ root.innerHTML = `
         <div class="report-head">
           <h2 style="margin:0">Referto strutturato</h2>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-            <div class="zone-toggle" id="reportModeToggle"><div class="zone-toggle-knob"></div><div class="zone-toggle-glass"></div>
-              <button data-reportmode="pdf" class="active">Modalit&agrave; PDF</button>
-              <button data-reportmode="pacs">Modalit&agrave; PACS</button>
+            <div class="mode-toggle" id="reportModeToggle">
+              <div class="liquid-layer">
+                <div class="mode-toggle-chaser" id="reportModeChaser"></div>
+                <div class="mode-toggle-knob" id="reportModeKnob"></div>
+              </div>
+              <div class="knob-glass" id="reportModeGlass"><div class="knob-tint"></div></div>
+              <button class="mode-btn active" id="reportModePdfBtn" data-reportmode="pdf">Modalit&agrave; PDF</button>
+              <button class="mode-btn" id="reportModePacsBtn" data-reportmode="pacs">Modalit&agrave; PACS</button>
             </div>
             <button class="secondary" id="regenReportBtn" style="width:auto;margin-top:0;padding:6px 12px;">Rigenera</button>
-            <button class="secondary" id="copyReportBtn" style="width:auto;margin-top:0;padding:6px 12px;">Copia</button>
+            <button class="secondary" id="copyReportBtn" style="width:auto;margin-top:0;padding:6px 12px;">Copia per PACS</button>
             <button class="primary" id="printReportBtn" style="width:auto;margin-top:0;padding:6px 12px;">Stampa</button>
           </div>
         </div>
@@ -3429,19 +3440,86 @@ function generateReport() {
   reportOutput.value = buildReportLines(true, reportOutputMode).join('\n');
 }
 let reportOutputMode = 'pdf'; // 'pdf' | 'pacs'
-document.querySelectorAll('#reportModeToggle button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    reportOutputMode = btn.dataset.reportmode;
-    updateToggleInPlace(btn);
-    reportManuallyEdited = false; // il cambio di modalita' rigenera sempre, sovrascrivendo eventuali modifiche manuali
-    generateReport();
+
+// stessa meccanica del toggle Normale/Creativa (misura i rect reali dei pulsanti, stessa
+// curva elastica), variabili proprie per non interferire con quel toggle.
+const reportToggleEl = document.getElementById('reportModeToggle');
+const reportKnob = document.getElementById('reportModeKnob');
+const reportGlass = document.getElementById('reportModeGlass');
+const reportChaser = document.getElementById('reportModeChaser');
+const reportPdfBtn = document.getElementById('reportModePdfBtn');
+const reportPacsBtn = document.getElementById('reportModePacsBtn');
+
+function rectForReportBtn(btn) {
+  const toggleRect = reportToggleEl.getBoundingClientRect();
+  const btnRect = btn.getBoundingClientRect();
+  return {
+    left: (btnRect.left - toggleRect.left) - SIDE_EXPAND - LEFT_SHIFT,
+    width: btnRect.width + SIDE_EXPAND * 2
+  };
+}
+let reportMorphTimer = null;
+function moveReportKnob(targetBtn) {
+  const prevLeft = parseFloat(getComputedStyle(reportKnob).left) || 4;
+  const prevWidth = parseFloat(getComputedStyle(reportKnob).width) || targetBtn.offsetWidth;
+  const isMove = Math.round(prevLeft) !== Math.round(rectForReportBtn(targetBtn).left);
+  const target = rectForReportBtn(targetBtn);
+
+  if (isMove) {
+    reportToggleEl.classList.add('is-morphing');
+    clearTimeout(reportMorphTimer);
+    reportMorphTimer = setTimeout(() => reportToggleEl.classList.remove('is-morphing'), 720);
+  }
+
+  reportChaser.style.setProperty('--chaser-left', prevLeft + 'px');
+  reportChaser.style.setProperty('--chaser-width', prevWidth + 'px');
+  reportChaser.style.setProperty('--chaser-opacity', '.9');
+  reportChaser.style.transition = 'none';
+  void reportChaser.offsetWidth;
+  reportChaser.style.transition = '';
+
+  requestAnimationFrame(() => {
+    reportChaser.style.setProperty('--chaser-left', (target.left + target.width / 2 - 2) + 'px');
+    reportChaser.style.setProperty('--chaser-width', '4px');
+    reportChaser.style.setProperty('--chaser-opacity', '0');
   });
-});
-syncZoneToggleKnobs(document.getElementById('reportModeToggle'), true);
+
+  setKnobVars(reportKnob, target.left, target.width);
+  setKnobVars(reportGlass, target.left, target.width);
+}
+let reportColorTimer = null;
+function updateReportModeButtons() {
+  reportPdfBtn.classList.toggle('active', reportOutputMode === 'pdf');
+  reportPacsBtn.classList.toggle('active', reportOutputMode === 'pacs');
+  moveReportKnob(reportOutputMode === 'pacs' ? reportPacsBtn : reportPdfBtn);
+  clearTimeout(reportColorTimer);
+  reportColorTimer = setTimeout(() => { reportToggleEl.dataset.mode = reportOutputMode; }, MOVE_MS);
+}
+function pressReportToggle(state) { reportToggleEl.classList.toggle('is-pressed', state); }
+['pointerdown'].forEach(ev => reportToggleEl.addEventListener(ev, () => pressReportToggle(true)));
+['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => reportToggleEl.addEventListener(ev, () => pressReportToggle(false)));
+new ResizeObserver(() => updateReportModeButtons()).observe(reportToggleEl);
+
+function setReportMode(mode) {
+  reportOutputMode = mode;
+  updateReportModeButtons();
+  // rigenera sempre e direttamente, senza passare dal guard "modificato a mano" di
+  // generateReport() -- cambiare modalita' deve aggiornare il testo in ogni caso.
+  reportOutput.value = buildReportLines(true, reportOutputMode).join('\n');
+  reportManuallyEdited = false;
+}
+reportPdfBtn.addEventListener('click', () => setReportMode('pdf'));
+reportPacsBtn.addEventListener('click', () => setReportMode('pacs'));
+updateReportModeButtons();
 document.getElementById('regenReportBtn').addEventListener('click', () => { reportManuallyEdited=false; generateReport(); });
 document.getElementById('copyReportBtn').addEventListener('click', () => {
-  reportOutput.select();
-  navigator.clipboard.writeText(reportOutput.value).catch(()=>document.execCommand('copy'));
+  // copia sempre il formato PACS (elenco, non tabella a colonne) indipendentemente dalla
+  // modalita' attualmente mostrata a schermo -- e' un'azione dedicata, non "copia quello che vedi"
+  const pacsText = buildReportLines(true, 'pacs').join('\n');
+  navigator.clipboard.writeText(pacsText).catch(() => {
+    reportOutput.value = pacsText; reportOutput.select(); document.execCommand('copy');
+    reportOutput.value = buildReportLines(true, reportOutputMode).join('\n'); // ripristina la vista corrente
+  });
 });
 document.getElementById('printReportBtn').addEventListener('click', () => { buildPrintView(); window.print(); });
 generateReport();
@@ -3467,6 +3545,21 @@ function buildPrintView() {
       if (re.test(id)) return true;
     }
     return false;
+  }
+  // le sfumature radiali usate per il riempimento delle lesioni disegnate a mano (penna/ellisse)
+  // non sopravvivono in modo affidabile alla generazione PDF/stampa in tutti i browser -- per
+  // la stampa sostituiamo il fill con il colore pieno equivalente (preso dal primo stop della
+  // sfumatura originale) invece di affidarci al riferimento url(#...) che a volte si perde.
+  function flattenDrawingGradientsForPrint(clone) {
+    clone.querySelectorAll('path[fill^="url(#grad_"]').forEach(shape => {
+      const fillAttr = shape.getAttribute('fill'); // es. "url(#grad_ab12cd3)"
+      const gradId = fillAttr.slice(5, -1);
+      const grad = clone.querySelector('#' + gradId);
+      const firstStop = grad ? grad.querySelector('stop') : null;
+      const color = firstStop ? firstStop.getAttribute('stop-color') : (shape.getAttribute('stroke') || '#e0752f');
+      shape.setAttribute('fill', color);
+      shape.setAttribute('fill-opacity', '0.5');
+    });
   }
   function forcePrintDecorative(clone, isSagittal) {
     clone.querySelectorAll('[id]').forEach(el => {
@@ -3513,12 +3606,14 @@ function buildPrintView() {
       });
     }
     forcePrintDecorative(clone, isSagittal);
+    flattenDrawingGradientsForPrint(clone);
     return clone.outerHTML;
   }
 
   const activeLevel = LEVEL_ORDER[currentIdx];
   const axialSvgSource = document.querySelector(`#discLayers .disc-layer[data-level="${activeLevel}"] svg`);
   const axialSvg = axialSvgSource ? axialSvgSource.cloneNode(true) : null;
+  if (axialSvg) flattenDrawingGradientsForPrint(axialSvg); // l'assiale non passa da forcePrintDecorative, va trattato a parte
   const coronalHtml = cloneFaded('#coronalHolder svg', id => SECTOR_ID_RE.coronal.test(id), false);
   const activeSide = document.querySelector('#sagittalHolder .sag-layer.active');
   const sagittalHtml = activeSide ? cloneFaded(`#sagittalHolder .sag-layer[data-side="${activeSide.dataset.side}"] svg`, id => SECTOR_ID_RE.sagittal.test(id), true) : '';
