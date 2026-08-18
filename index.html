@@ -230,6 +230,10 @@
 
   /* ---- Cronologia ---- */
   #root .cronologia-actions { display:flex; gap:6px; }
+  #root .indication-chips { display:flex; gap:5px; margin-bottom:6px; flex-wrap:wrap; }
+  #root .indication-chip { font-size:10.5px; padding:5px 11px; border-radius:999px; border:1px solid rgba(255,255,255,.6); background:rgba(255,255,255,.4); color:var(--text-dim); cursor:pointer; transition:all .2s ease; }
+  #root .indication-chip:hover { background:rgba(234,244,252,.8); border-color:var(--accent-dim); color:var(--accent); transform:translateY(-1px); }
+  #root .indication-chip.active { background:linear-gradient(155deg,#2382d4,#1a5fa0); border-color:transparent; color:#fff; font-weight:600; }
   #root .cron-btn { font-size:10.5px; padding:6px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.6); background:rgba(255,255,255,.45); color:var(--text-dim); cursor:pointer; white-space:nowrap; transition:all .2s ease; }
   #root .cron-btn:hover { background:rgba(234,244,252,.8); border-color:var(--accent-dim); color:var(--accent); transform:translateY(-1px); }
   #root .cron-dropdown-wrap { position:relative; }
@@ -280,7 +284,7 @@
   #root .zone-toggle-exam .zone-toggle-glass::after { display: none; }
   #root .zone-toggle button { position:relative; z-index:2; flex:1; padding:6px; font-size:10.5px; border-radius:999px; border:none; background:transparent; color:var(--text-dim); cursor:pointer; transition:color .3s ease; }
   #root .zone-toggle button.active { color:#fff; font-weight:600; }
-  #root .exam-detail { display:flex; gap:6px; margin-top:5px; }
+  #root .exam-detail { display:flex; flex-wrap:wrap; gap:6px; margin-top:5px; }
   #root .exam-detail select, #root .exam-detail input { flex:1; font-size:11px; padding:8px 11px; background:rgba(255,255,255,.5); border:1px solid rgba(255,255,255,.65); border-radius:14px; transition:all .25s cubic-bezier(.34,1.56,.64,1); }
   #root .exam-detail select:focus, #root .exam-detail input:focus { outline:none; background:rgba(255,255,255,.85); box-shadow:0 0 0 4px rgba(35,130,212,.18); transform:translateY(-1px); }
   /* la sede (select) ha bisogno di piu' spazio dei nomi lunghi ("Iliaco esterno", ecc.); il
@@ -560,6 +564,7 @@
 
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+    #root .rf-bg { display:none !important; }
     #root .wrap > *:not(.print-area) { display:none !important; }
     #root .print-area { display:block !important; background:#fff; color:#111; font-family:'IBM Plex Sans',Arial,sans-serif; padding:10px; }
     #root .print-area .ph-header { display:flex; justify-content:space-between; border-bottom:2px solid #222; padding-bottom:8px; margin-bottom:10px; font-size:11px; }
@@ -734,7 +739,15 @@ root.innerHTML = `
             <div style="flex:2"><label>Paziente</label><input type="text" id="metaPatient"></div>
             <div style="flex:1"><label>ID</label><input type="text" id="metaPid"></div>
           </div>
-          <div class="meta-field"><label>Indicazione clinica</label><input type="text" id="metaIndication"></div>
+          <div class="meta-field">
+            <label>Indicazione clinica</label>
+            <div class="indication-chips">
+              <button type="button" class="indication-chip" data-indication="Staging">Staging</button>
+              <button type="button" class="indication-chip" data-indication="Detection">Detection</button>
+              <button type="button" class="indication-chip" data-indication="Sorveglianza">Sorveglianza</button>
+            </div>
+            <input type="text" id="metaIndication">
+          </div>
           <div class="meta-field row">
             <div><label>PSA (ng/ml)</label><input type="number" step="0.1" id="metaPsa"></div>
             <div><label>Dose mdc (mL)</label><input type="number" id="metaMdc"></div>
@@ -1837,7 +1850,7 @@ document.getElementById('coronalHolder').innerHTML = `<svg viewBox="0 0 678 900"
 // CONSTANTS
 // ============================================================
 const LEVEL_ORDER = ['apex','mid','base'];
-const LEVEL_NAMES = {base:'Base', mid:'Corpo medio', apex:'Apice'};
+const LEVEL_NAMES = {base:'Craniale', mid:'Intermedio', apex:'Apice'};
 const ZONE_NAMES = {
   AFS:'Stroma fibromuscolare anteriore', TZa:'Transition zone, anteriore', TZp:'Transition zone, posteriore',
   PZa:'Peripheral zone, anteriore', PZpl:'Peripheral zone, posterolaterale', PZpm:'Peripheral zone, posteromediale',
@@ -1856,6 +1869,16 @@ const TZ_OPTIONS = [
   [2,"Nodulo per lo piu incapsulato/omogeneo, o area ipointensa omogenea tra noduli"],
   [3,"Segnale eterogeneo, margini obliterati/mal definiti"],
   [4,"Lenticolare/non circoscritta, omogenea, moderatamente ipointensa, <1,5cm"],
+  [5,"Come 4 ma >=1,5cm, oppure segni di estensione extraprostatica"],
+];
+// lessico T2W per la zona periferica (descrittivo/correlato, non usato nel calcolo -- la
+// sequenza dominante in PZ resta DWI/ADC per linea guida ufficiale, ma la descrizione va
+// comunque documentata correttamente invece di un semplice numero 1-5 senza contesto)
+const PZ_T2_OPTIONS = [
+  [1,"Segnale iperintenso uniforme (normale)"],
+  [2,"Ipointensita lieve, lineare/a cuneo o diffusa, margini solitamente indistinti"],
+  [3,"Segnale eterogeneo o ipointensita moderata non circoscritta/rotondeggiante"],
+  [4,"Focale/massa ipointensa moderata, circoscritta, omogenea, confinata alla ghiandola, <1,5cm"],
   [5,"Come 4 ma >=1,5cm, oppure segni di estensione extraprostatica"],
 ];
 const CATEGORY_COLORS = {1:'#3fae6a', 2:'#8fbf5a', 3:'#d99a26', 4:'#e0752f', 5:'#c73e3e'};
@@ -1891,6 +1914,12 @@ function isNearWhite(el) {
 }
 function isUnresolvedGradient(el) {
   return /fill:\s*url\(/.test(el.getAttribute('style') || '');
+}
+// una sfumatura usata come CONTORNO (non riempimento) che non si risolve: il bordo semplicemente
+// non appare, e la forma si confonde con lo sfondo -- e' il caso della struttura esterna delle
+// vescicole seminali in sagittale, distinto da isUnresolvedGradient che guarda solo il fill.
+function hasUnresolvedStroke(el) {
+  return /stroke:\s*url\(/.test(el.getAttribute('style') || '');
 }
 
 // decorative shapes (seminal vesicle outline/detail, urethra, etc.) that are near-white or have a
@@ -2091,12 +2120,20 @@ function computeCategory(entry) {
     if (d === 3) return entry.dce === 'yes' ? 4 : 3;
     return d;
   }
-  if (entry.group === 'TZ') {
+  if (entry.group === 'TZ' || entry.group === 'AFS') {
+    // AFS (stroma fibromuscolare anteriore) non aveva mai una categoria calcolata: cadeva
+    // sempre nel default null in fondo alla funzione. Per prassi PI-RADS lo stroma fibromuscolare
+    // si valuta con gli stessi criteri della zona di transizione (T2 dominante).
     const t = entry.t2, d = entry.dwi;
     if (!t) return null;
-    if (t === 2) return (d && d >= 4) ? 3 : 2;
-    if (t === 3) return (d === 5) ? 4 : 3;
-    return t;
+    let cat = t;
+    if (t === 2) cat = (d && d >= 4) ? 3 : 2;
+    if (t === 3) cat = (d === 5) ? 4 : 3;
+    // NOTA: prassi clinica locale, non da linea guida ufficiale PI-RADS v2.1 (che riserva la
+    // DCE alla sola zona periferica) -- richiesta esplicita del radiologo: DCE positiva con
+    // DWI 3 fa salire la categoria di un punto anche in TZ/AFS.
+    if (d === 3 && entry.dce === 'yes' && cat < 5) cat = cat + 1;
+    return cat;
   }
   return null;
 }
@@ -2164,7 +2201,7 @@ function renderScoringPanel() {
   scoringPanel.innerHTML = html;
   wireCommonHandlers();
   if (currentMode === 'normal') wireNormalForm(group); else wireCreativeForm(group);
-  syncZoneToggleKnobs(scoringPanel);
+  syncZoneToggleKnobs(scoringPanel, true);
 }
 
 // ---------------- normal mode ----------------
@@ -2173,16 +2210,19 @@ function renderNormalForm(group, side, level, zone) {
   const opts = group === 'PZ' ? PZ_OPTIONS : TZ_OPTIONS;
   const primaryLabel = group === 'PZ' ? 'DWI/ADC (dominante)' : 'T2W (dominante)';
   let html = `<div class="field"><label>${primaryLabel}</label><select class="wide" id="primarySelect"></select><div class="opt-desc" id="primaryDesc"></div></div>`;
-  if (group === 'PZ' && entry.dwi === 3) {
+  if (group === 'TZ' || group === 'AFS') {
+    html += `<div class="field"><label>DWI/ADC (per upgrade)</label><select class="wide" id="dwiSelect"></select><div class="opt-desc" id="dwiDesc"></div></div>`;
+  }
+  if (entry.dwi === 3) {
+    // DCE ora richiesta anche in zona di transizione/AFS oltre che periferica (feedback
+    // clinico locale: puo' far salire la categoria anche li', non solo in PZ come da linea
+    // guida ufficiale PI-RADS v2.1 -- vedi nota in computeCategory)
     html += `<div class="field"><label>DCE</label><div class="zone-toggle"><div class="zone-toggle-knob"></div><div class="zone-toggle-glass"></div>
       <button data-dce="no" class="${entry.dce==='no'?'active':''}">Negativo</button>
       <button data-dce="yes" class="${entry.dce==='yes'?'active':''}">Positivo</button></div></div>`;
   }
-  if (group === 'TZ') {
-    html += `<div class="field"><label>DWI/ADC (per upgrade)</label><select class="wide" id="dwiSelect"></select><div class="opt-desc" id="dwiDesc"></div></div>`;
-  }
   if (group === 'PZ') {
-    html += `<div class="field"><label>T2W (correlato, non usato nel calcolo)</label><select class="wide" id="t2CorrelateSelect"><option value="">--</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${entry.t2Correlate==n?'selected':''}>${n}</option>`).join('')}</select></div>`;
+    html += `<div class="field"><label>T2W (correlato, non usato nel calcolo)</label><select class="wide" id="t2CorrelateSelect"></select><div class="opt-desc" id="t2CorrelateDesc"></div></div>`;
   }
   html += `<div class="field" style="display:flex;gap:8px;">
       <div style="flex:1"><label>Diametro (mm)</label><input type="number" class="wide" id="sizeInput" value="${entry.size||''}"></div>
@@ -2216,10 +2256,7 @@ function wireNormalForm(group) {
     upd(); renderScoringPanel();
   });
   enhanceSelectAsBubbleDropdown(primarySelect);
-  if (group === 'PZ' && entry.dwi === 3) {
-    document.querySelectorAll('#scoringPanel [data-dce]').forEach(btn => btn.addEventListener('click', () => { entry.dce = btn.dataset.dce; updateToggleInPlace(btn); updateResultBoxInPlace(entry); }));
-  }
-  if (group === 'TZ') {
+  if (group === 'TZ' || group === 'AFS') {
     const dwiSelect = document.getElementById('dwiSelect');
     renderOptions(dwiSelect, PZ_OPTIONS, entry.dwi);
     const dwiDesc = document.getElementById('dwiDesc');
@@ -2228,9 +2265,16 @@ function wireNormalForm(group) {
     dwiSelect.addEventListener('change', () => { entry.dwi = Number(dwiSelect.value)||null; updD(); renderScoringPanel(); });
     enhanceSelectAsBubbleDropdown(dwiSelect);
   }
+  if (entry.dwi === 3) {
+    document.querySelectorAll('#scoringPanel [data-dce]').forEach(btn => btn.addEventListener('click', () => { entry.dce = btn.dataset.dce; updateToggleInPlace(btn); updateResultBoxInPlace(entry); }));
+  }
   if (group === 'PZ') {
     const t2CorrelateSelect = document.getElementById('t2CorrelateSelect');
-    t2CorrelateSelect.addEventListener('change', e => { entry.t2Correlate = e.target.value?Number(e.target.value):null; });
+    renderOptions(t2CorrelateSelect, PZ_T2_OPTIONS, entry.t2Correlate);
+    const t2CorrelateDesc = document.getElementById('t2CorrelateDesc');
+    const updT2 = () => { const f = PZ_T2_OPTIONS.find(o=>String(o[0])===t2CorrelateSelect.value); t2CorrelateDesc.textContent = f?f[1]:''; };
+    updT2();
+    t2CorrelateSelect.addEventListener('change', () => { entry.t2Correlate = t2CorrelateSelect.value?Number(t2CorrelateSelect.value):null; updT2(); });
     enhanceSelectAsBubbleDropdown(t2CorrelateSelect);
   }
   document.getElementById('sizeInput').addEventListener('input', e => { entry.size = e.target.value?Number(e.target.value):null; });
@@ -2485,13 +2529,26 @@ setLevel(0);
 document.getElementById('prevBtn').addEventListener('click', () => setLevel(currentIdx - 1));
 document.getElementById('nextBtn').addEventListener('click', () => setLevel(currentIdx + 1));
 const stage = document.getElementById('stage');
-stage.addEventListener('wheel', e => { e.preventDefault(); setLevel(currentIdx + (e.deltaY > 0 ? 1 : -1)); }, { passive: false });
+// ancorato al disegno (discLayers), non all'intera finestra .stage: cosi' passare vicino ai
+// controlli o al bordo del pannello non fa scorrere accidentalmente il livello -- serve
+// scrollare proprio sopra l'immagine assiale. L'ascoltatore funziona per bubbling anche se
+// discLayers stesso non ha dimensioni proprie (i suoi figli sono posizionati assolutamente).
+// il contenitore .disc-layer.active copre quasi l'intera finestra .stage (solo 14px di
+// margine), quindi ancorare l'ascoltatore li' non bastava: bisogna controllare che il cursore
+// sia davvero sopra una forma disegnata (un <path>), non sullo spazio vuoto/trasparente
+// attorno all'immagine (l'SVG mantiene le proporzioni al suo interno, lasciando margini vuoti
+// dentro il proprio riquadro se il contenitore ha un rapporto larghezza/altezza diverso).
+discLayers.addEventListener('wheel', e => {
+  if (e.target.tagName !== 'path') return; // fuori dal disegno: lascia scorrere la pagina normalmente
+  e.preventDefault();
+  setLevel(currentIdx + (e.deltaY > 0 ? 1 : -1));
+}, { passive: false });
 document.addEventListener('keydown', e => { if (e.key==='ArrowUp') setLevel(currentIdx-1); if (e.key==='ArrowDown') setLevel(currentIdx+1); });
 
 // ============================================================
 // ZONE-TOGGLE KNOB SYNC (DCE, contatto capsula, ulteriori rilievi)
 // ============================================================
-function syncZoneToggleKnobs(scope) {
+function syncZoneToggleKnobs(scope, instant) {
   const root = scope || document;
   // querySelectorAll only searches descendants -- if scope itself is a .zone-toggle
   // (as updateToggleInPlace passes it), it needs to be included explicitly too.
@@ -2513,9 +2570,24 @@ function syncZoneToggleKnobs(scope) {
       const btnRect = target.getBoundingClientRect();
       const left = btnRect.left - ztRect.left;
       const width = btnRect.width;
+      if (instant) {
+        // il pannello di scoring viene ricostruito da zero ad ogni modifica di un campo (anche
+        // non correlato al toggle stesso): questi elementi sono quindi SEMPRE nuovi. Se
+        // lasciamo attiva la transizione CSS, il browser anima dalla posizione di default
+        // (var(--knob-left) di riserva) a quella vera ogni singola volta, facendo "rimbalzare"
+        // il cursore anche quando nessuno lo ha davvero toccato. Qui la posizioniamo di scatto,
+        // e solo i veri click (via updateToggleInPlace, senza instant) restano animati.
+        knob.style.transition = 'none';
+        if (glass) glass.style.transition = 'none';
+      }
       knob.style.setProperty('--knob-left', left + 'px');
       knob.style.setProperty('--knob-width', width + 'px');
       if (glass) { glass.style.setProperty('--knob-left', left + 'px'); glass.style.setProperty('--knob-width', width + 'px'); }
+      if (instant) {
+        void knob.offsetWidth; // forza il reflow prima di ripristinare la transizione
+        knob.style.transition = '';
+        if (glass) glass.style.transition = '';
+      }
     }
     // set text color explicitly per button (not just via CSS) so the active label is always
     // white-on-blue and readable, regardless of any cascade surprises
@@ -3032,8 +3104,8 @@ function enhanceSelectAsBubbleDropdown(selectEl) {
 // EXAM METADATA
 // ============================================================
 const meta = { institute:'', patient:'', pid:'', indication:'', psa:null, ap:null, lr:null, cc:null,
-  mdc:null, altri:'', nodes:'normal', sv:'normal', bones:'normal', svSide:'',
-  nodesSite:'', nodesSize:null, bonesSite:'', bonesSize:null, bladder:'negative', bladderNote:'', fluid:'negative', fluidNote:'',
+  mdc:null, altri:'', nodesLoco:'normal', nodesDist:'normal', sv:'normal', bones:'normal', svSide:'',
+  nodesLocoSite:'', nodesLocoSize:null, nodesDistSite:'', nodesDistSize:null, nodesDistOther:'', bonesSite:'', bonesSize:null, bladder:'negative', bladderNote:'',
   physician:'', tsrm:'',
   tecnica: "Esame eseguito su apparecchiatura RM da 3 Tesla con utilizzo di due bobine phased-array di superficie da 30 canali ciascuna (totale 60 canali).\nRM multiparametrica con protocollo secondo linee guida PI-RADS v2.1.\n- Sequenze TSE pesate in T2 (T2w) multiplanari con FOV mirato ad elevata risoluzione spaziale.\n- Sequenze pesate in diffusione (DWI) con tre valori di b nativi (100, 200, 1000 mm2/s) e b calcolato di 1500mm2/s; mappe ADC.\n- Sequenze GRE 3D T1 pesate dinamiche dopo somministrazione di mezzo di contrasto a base di gadolinio (DCE), con sottrazione." };
 
@@ -3043,10 +3115,26 @@ const meta = { institute:'', patient:'', pid:'', indication:'', psa:null, ap:nul
     const numeric = ['psa','mdc','ap','lr','cc'].includes(key);
     meta[key] = numeric ? (e.target.value?Number(e.target.value):null) : e.target.value;
     updateMetaReadout(); generateReport();
+    if (id === 'metaIndication') syncIndicationChips();
   });
 });
 document.getElementById('metaTecnica').value = meta.tecnica;
 document.getElementById('metaTecnica').addEventListener('input', e => { meta.tecnica = e.target.value; generateReport(); });
+
+// preset rapidi per l'indicazione clinica (staging/detection/sorveglianza): riempiono il campo,
+// che resta comunque testo libero modificabile per aggiungere dettagli
+function syncIndicationChips() {
+  document.querySelectorAll('.indication-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.indication === meta.indication);
+  });
+}
+document.querySelectorAll('.indication-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const field = document.getElementById('metaIndication');
+    field.value = chip.dataset.indication;
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+});
 
 function computeVolumeDensity() {
   if (!(meta.ap && meta.lr && meta.cc)) return { volume:null, density:null };
@@ -3062,14 +3150,14 @@ function updateMetaReadout() {
 }
 updateMetaReadout();
 
-// ---------------- exam findings (linfonodi/ossa/vescica/vescicole/falda) ----------------
+// ---------------- exam findings (linfonodi locoregionali/a distanza, ossa, vescica, vescicole) ----------------
 const examFieldsHolder = document.getElementById('examFieldsHolder');
 const EXAM_FIELDS = [
-  { key:'nodes', label:'Linfonodi pelvici', off:'normal', on:'suspicious', offL:'Non significativi', onL:'Sospetti' },
+  { key:'nodesLoco', label:'Linfonodi locoregionali', off:'normal', on:'suspicious', offL:'Non significativi', onL:'Sospetti' },
+  { key:'nodesDist', label:'Linfonodi a distanza', off:'normal', on:'suspicious', offL:'Non significativi', onL:'Sospetti' },
   { key:'bones', label:'Ossa', off:'normal', on:'suspicious', offL:'Non evidenza di lesioni', onL:'Sospette' },
   { key:'bladder', label:'Vescica', off:'negative', on:'positive', offL:'Nella norma', onL:'Reperti patologici' },
   { key:'sv', label:'Vescicole seminali', off:'normal', on:'suspicious', offL:'Nei limiti', onL:'Sospette' },
-  { key:'fluid', label:'Falda liquida periprostatica', off:'negative', on:'positive', offL:'Assente', onL:'Presente' },
 ];
 examFieldsHolder.innerHTML = EXAM_FIELDS.map(f => `<div class="meta-field">
     <div class="exam-row-title">${f.label}</div>
@@ -3080,30 +3168,41 @@ examFieldsHolder.innerHTML = EXAM_FIELDS.map(f => `<div class="meta-field">
     <div class="exam-detail" id="detail-${f.key}" style="display:none"></div>
   </div>`).join('');
 
-document.getElementById('detail-nodes').innerHTML = `
-  <select id="nodesSite"><option value="">-- sede --</option>
+document.getElementById('detail-nodesLoco').innerHTML = `
+  <select id="nodesLocoSite"><option value="">-- sede --</option>
     <option value="otturatorio">Otturatorio</option><option value="iliaco esterno">Iliaco esterno</option>
     <option value="iliaco interno">Iliaco interno</option><option value="iliaco comune">Iliaco comune</option>
     <option value="presacrale">Presacrale</option><option value="inguinale">Inguinale</option></select>
-  <input type="number" id="nodesSize" placeholder="mm">`;
+  <input type="number" id="nodesLocoSize" placeholder="mm">`;
+document.getElementById('detail-nodesDist').innerHTML = `
+  <select id="nodesDistSite"><option value="">-- sede --</option>
+    <option value="para-aortico">Para-aortico</option><option value="retroperitoneale">Retroperitoneale</option>
+    <option value="sovraclaveare">Sovraclaveare</option><option value="altro">Altro</option></select>
+  <input type="number" id="nodesDistSize" placeholder="mm">
+  <input type="text" id="nodesDistOther" placeholder="specifica dove" style="flex-basis:100%; display:none;">`;
 document.getElementById('detail-bones').innerHTML = `<input type="text" id="bonesSite" placeholder="sede"><input type="number" id="bonesSize" placeholder="mm">`;
 document.getElementById('detail-bladder').innerHTML = `<input type="text" id="bladderNote" placeholder="descrizione">`;
 document.getElementById('detail-sv').innerHTML = `<select id="svSide"><option value="">-- lato --</option>
   <option value="destra">Destra</option><option value="sinistra">Sinistra</option><option value="bilaterale">Bilaterale</option></select>`;
-document.getElementById('detail-fluid').innerHTML = `<input type="text" id="fluidNote" placeholder="es. modica quantita">`;
 
-['nodesSite','nodesSize','bonesSite','bonesSize','bladderNote','svSide','fluidNote'].forEach(id => {
+['nodesLocoSite','nodesLocoSize','nodesDistSite','nodesDistSize','nodesDistOther','bonesSite','bonesSize','bladderNote','svSide'].forEach(id => {
   const el = document.getElementById(id);
   const handler = () => {
-    meta[id] = (id==='nodesSize'||id==='bonesSize') ? (el.value?Number(el.value):null) : el.value;
+    meta[id] = (id==='nodesLocoSize'||id==='nodesDistSize'||id==='bonesSize') ? (el.value?Number(el.value):null) : el.value;
     if (id === 'svSide') setSvHighlight(meta.sv==='suspicious' ? meta.svSide : null);
+    if (id === 'nodesDistSite') {
+      const otherField = document.getElementById('nodesDistOther');
+      const isAltro = el.value === 'altro';
+      otherField.style.display = isAltro ? '' : 'none';
+      if (!isAltro) { otherField.value = ''; meta.nodesDistOther = ''; }
+    }
     generateReport();
   };
   el.addEventListener('input', handler);
   el.addEventListener('change', handler);
 });
 
-const EXAM_ON_VALUES = { nodes:'suspicious', bones:'suspicious', bladder:'positive', sv:'suspicious', fluid:'positive' };
+const EXAM_ON_VALUES = { nodesLoco:'suspicious', nodesDist:'suspicious', bones:'suspicious', bladder:'positive', sv:'suspicious' };
 document.querySelectorAll('.exam-toggle').forEach(btn => {
   btn.addEventListener('click', () => {
     const exam = btn.dataset.exam, val = btn.dataset.val;
@@ -3116,8 +3215,8 @@ document.querySelectorAll('.exam-toggle').forEach(btn => {
     generateReport();
   });
 });
-syncZoneToggleKnobs(examFieldsHolder);
-Array.from(document.querySelectorAll('#detail-nodes select, #detail-sv select')).forEach(sel => enhanceSelectAsBubbleDropdown(sel));
+syncZoneToggleKnobs(examFieldsHolder, true);
+Array.from(document.querySelectorAll('#detail-nodesLoco select, #detail-nodesDist select, #detail-sv select')).forEach(sel => enhanceSelectAsBubbleDropdown(sel));
 
 // ---------------- Cronologia (salvataggio manuale nome + istituto/indicazione) ----------------
 function loadPresets() {
@@ -3342,7 +3441,8 @@ function buildPrintView() {
       const id = el.id || '';
       const isSector = isSagittal ? SECTOR_ID_RE.sagittal.test(id) : SECTOR_ID_RE.coronal.test(id);
       const isSvP = isSagittal ? SV_ID_RE.sagittal.test(id) : SV_ID_RE.coronal.test(id);
-      if (!isSector && !isSvP && (isNearWhite(el) || isUnresolvedGradient(el))) {
+      if (isSector || isSvP) return;
+      if (isNearWhite(el) || isUnresolvedGradient(el)) {
         // queste sono per lo piu' la struttura esterna/i dettagli interni delle vescicole
         // (linee decorative senza id proprio) -- prima venivano riempite di bianco ma senza
         // alcun contorno, quindi sparivano del tutto sullo sfondo bianco della stampa.
@@ -3351,6 +3451,13 @@ function buildPrintView() {
         el.style.setProperty('stroke-width', '1', 'important');
         el.style.setProperty('stroke-opacity', '1', 'important');
         el.style.setProperty('opacity', '1', 'important');
+      } else if (hasUnresolvedStroke(el)) {
+        // il riempimento e' valido (non near-white), ma il CONTORNO punta a una sfumatura che
+        // non si risolve -- la forma resta col suo colore originale, le diamo solo un bordo
+        // nero al posto di quello mancante.
+        el.style.setProperty('stroke', '#000000', 'important');
+        el.style.setProperty('stroke-width', '1', 'important');
+        el.style.setProperty('stroke-opacity', '1', 'important');
       }
     });
   }
